@@ -1,0 +1,271 @@
+//
+//  OrderedDictionary.m
+//
+//  Version 1.1
+//
+//  Created by Nick Lockwood on 21/09/2010.
+//  Copyright 2010 Charcoal Design. All rights reserved.
+//
+
+#import "OrderedDictionary.h"
+
+
+#import <Availability.h>
+#if !__has_feature(objc_arc)
+#error This class requires automatic reference counting
+#endif
+
+
+@interface OrderedDictionaryReverseObjectEnumerator : NSEnumerator
+
+@property (nonatomic, copy) NSArray *keys;
+@property (nonatomic, copy) NSDictionary *values;
+@property (nonatomic, assign) NSInteger index;
+
++ (id)enumeratorWithKeys:(NSArray *)keys values:(NSDictionary *)values;
+- (id)initWithKeys:(NSArray *)keys values:(NSDictionary *)values;
+
+@end
+
+
+@implementation OrderedDictionaryReverseObjectEnumerator
+
++ (id)enumeratorWithKeys:(NSArray *)keys values:(NSDictionary *)values
+{
+    return [[self alloc] initWithKeys:keys values:values];
+}
+
+- (id)initWithKeys:(NSArray *)keys values:(NSDictionary *)values
+{
+    if ((self = [super init]))
+    {
+        _keys = [_keys copy];
+        _values = [_values copy];
+        _index = [keys count] - 1;
+    }
+    return self;
+}
+
+- (id)nextObject
+{   
+    return (_index < 0)? nil: _values[_keys[_index--]];
+}
+
+@end
+
+
+@interface OrderedDictionary ()
+
+@property (nonatomic, strong) NSMutableDictionary *values;
+@property (nonatomic, strong) NSMutableArray *keys;
+
+@end
+
+
+@implementation OrderedDictionary
+
+- (instancetype)initWithObjects:(const id [])objects forKeys:(const id <NSCopying> [])keys count:(NSUInteger)count
+{   
+    if ((self = [super init]))
+    {
+        _values = [[NSMutableDictionary alloc] initWithCapacity:count];
+        _keys = [[NSMutableArray alloc] initWithCapacity:count];
+        for (NSUInteger i = 0; i < count; i++)
+        {
+            if (!_values[keys[i]])
+            {
+                [_keys addObject:keys[i]];
+            }
+            _values[keys[i]] = objects[i];
+        }
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{   
+    return self;
+}
+
+- (id)mutableCopyWithZone:(NSZone *)zone
+{    
+    return [[[MutableOrderedDictionary class] allocWithZone:zone] initWithDictionary:self];
+}
+
+- (NSUInteger)count
+{    
+    return [_keys count];
+}
+
+- (id)objectForKey:(id)key
+{    
+    return _values[key];
+}
+
+- (NSEnumerator *)keyEnumerator
+{    
+    return [_keys objectEnumerator];
+}
+
+- (NSEnumerator *)reverseKeyEnumerator
+{    
+    return [_keys reverseObjectEnumerator];
+}
+
+- (NSEnumerator *)reverseObjectEnumerator
+{    
+    return [OrderedDictionaryReverseObjectEnumerator enumeratorWithKeys:_keys values:_values];
+}
+
+- (id)keyAtIndex:(NSUInteger)index
+{    
+    return _keys[index];
+}
+
+- (id)objectAtIndex:(NSUInteger)index
+{    
+    return _values[_keys[index]];
+}
+
+- (NSString *)descriptionForObject:(id)object locale:(id)locale indent:(NSUInteger)indent
+{    
+    if ([object respondsToSelector:@selector(descriptionWithLocale:indent:)])
+    {
+        return [object descriptionWithLocale:locale indent:indent];
+    }
+    else if ([object respondsToSelector:@selector(descriptionWithLocale:)])
+    {
+        return [object descriptionWithLocale:locale];
+    }
+    else
+    {
+        return [object description];
+    }
+}
+
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)indent
+{    
+    NSMutableString *padding = [NSMutableString string];
+    for (NSUInteger i = 0; i < indent; i++)
+    {
+        [padding appendString:@"    "];
+    }
+    
+    NSMutableString *description = [NSMutableString string];
+    [description appendFormat:@"%@{\n", padding];
+    for (NSObject *key in _keys)
+    {
+        [description appendFormat:@"%@    %@ = %@;\n", padding,
+         [self descriptionForObject:key locale:locale indent:indent],
+         [self descriptionForObject:self[key] locale:locale indent:indent]];
+    }
+    [description appendFormat:@"%@}\n", padding];
+    return description;
+}
+
+@end
+
+
+@implementation MutableOrderedDictionary
+
++ (id)dictionaryWithCapacity:(NSUInteger)count
+{
+    return [[self alloc] initWithCapacity:count];
+}
+
+- (id)initWithCapacity:(NSUInteger)capacity
+{    
+    if ((self = [super init]))
+    {
+        self.values = [NSMutableDictionary dictionaryWithCapacity:capacity];
+        self.keys = [NSMutableArray arrayWithCapacity:capacity];
+    }
+    return self;
+}
+
+- (id)init
+{
+    return [self initWithCapacity:0];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{    
+    return [[[OrderedDictionary class] allocWithZone:zone] initWithDictionary:self];
+}
+
+- (void)addEntriesFromDictionary:(NSDictionary *)otherDictionary
+{    
+    for (id key in otherDictionary)
+    {
+        [self setObject:otherDictionary[key] forKey:key];
+    }
+}
+
+- (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index
+{   
+    if ((self.values)[key])
+    {
+        if ([(self.keys)[index] isEqual:key])
+        {
+            (self.values)[key] = object;
+            return;
+        }
+        [self removeObjectForKey:key];
+    }
+    [self.keys insertObject:key atIndex:index];
+    (self.values)[key] = object;
+}
+
+- (void)removeAllObjects
+{    
+    [self removeObjectsForKeys:[self allKeys]];
+}
+
+- (void)removeObjectAtIndex:(NSUInteger)index
+{    
+    [self removeObjectForKey:[self keyAtIndex:index]];
+}
+
+- (void)removeObjectForKey:(id)key
+{   
+    [self.values removeObjectForKey:key];
+    [self.keys removeObject:key];
+}
+
+- (void)removeObjectsForKeys:(NSArray *)keyArray
+{    
+    NSArray *keys = [keyArray copy];
+    for (id key in keys)
+    {
+        [self removeObjectForKey:key];
+    }
+}
+
+- (void)setDictionary:(NSDictionary *)otherDictionary
+{    
+    [self removeAllObjects];
+    [self addEntriesFromDictionary:otherDictionary];
+}
+
+- (void)setObject:(id)object forKey:(id)key
+{
+    if (!(self.values)[key])
+    {
+        [self.keys addObject:key];
+    }
+    (self.values)[key] = object;
+}
+
+- (void)setValue:(id)value forKey:(NSString *)key
+{    
+    if (value)
+    {
+        [self setObject:value forKey:key];
+    }
+    else
+    {
+        [self removeObjectForKey:key];
+    }
+}
+
+@end
