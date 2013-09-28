@@ -106,7 +106,7 @@
     return self;
 }
 
-- (id)copyWithZone:(NSZone *)zone
+- (id)copyWithZone:(__unused NSZone *)zone
 {   
     return self;
 }
