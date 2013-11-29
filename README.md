@@ -25,7 +25,7 @@ If you wish to convert your whole project to ARC, comment out the #error line in
 Thread Safety
 --------------
 
-Access to and OrderedDictionary is inherently thread safe because it is immutable. Access to a MutableOrderedDictionary is not thread safe unless you ensure that no thread attempts to read from the dictionary whilst another is writing to it.
+Access to an OrderedDictionary is inherently thread safe because it is immutable. Access to a MutableOrderedDictionary is not thread safe unless you ensure that no thread attempts to read from the dictionary whilst another is writing to it.
 
 
 Installation

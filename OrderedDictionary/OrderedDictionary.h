@@ -57,8 +57,7 @@
  * new methods for operating on entities by index rather than key.
  * Note that although it has the same interface, MutableOrderedDictionary
  * is not a subclass of NSMutableDictionary, and cannot be used as one
- * without generating compiler warnings. Use OrderedMutableDictionary instead
- * if you need this functionality.
+ * without generating compiler warnings (unless you cast it).
  */
 @interface MutableOrderedDictionary : OrderedDictionary
 
