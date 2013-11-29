@@ -293,7 +293,7 @@
 
 - (void)setObject:(id)object forKeyedSubscript:(NSString *)key
 {
-    [self setValue:value forKey:key];
+    [self setValue:object forKey:key];
 }
 
 @end
