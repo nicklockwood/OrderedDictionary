@@ -7,7 +7,7 @@ The order of objects stored in an NSDictionary is undefined. Often it is useful 
 Supported OS & SDK Versions
 -----------------------------
 
-* Supported build target - iOS 7.0 / Mac OS 10.8 (Xcode 5.0, Apple LLVM compiler 5.0)
+* Supported build target - iOS 7.1 / Mac OS 10.9 (Xcode 5.1, Apple LLVM compiler 5.1)
 * Earliest supported deployment target - iOS 5.0 / Mac OS 10.7
 * Earliest compatible deployment target - iOS 4.3 / Mac OS 10.6
 
@@ -32,3 +32,24 @@ Installation
 --------------
 
 To install OrderedDictionary into your app, drag the OrderedDictionary.h and .m files into your project.
+
+
+Release Notes
+---------------
+
+Version 1.1.1
+
+- Added enumerateKeysAndObjectsWithIndexUsingBlock: method
+- Now conforms to -Weverything warning level
+
+Version 1.1
+
+- Now requires ARC
+- Updated to remove warnings in latest iOS
+- Removed OrderedMutableDictionary variant
+- Now complies to -Wextra warning level
+- Added podspec
+
+Version 1.0
+
+- Initial release

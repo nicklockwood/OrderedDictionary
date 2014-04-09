@@ -1,6 +1,6 @@
 OrderedDictionary
 
-Version 1.1, September 28th, 2013
+Version 1.1.1, April 9th, 2014
 
 Copyright (C) 2010 Charcoal Design
 

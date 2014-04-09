@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.m
 //
-//  Version 1.1
+//  Version 1.1.1
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design
@@ -31,6 +31,10 @@
 //
 
 #import "OrderedDictionary.h"
+
+
+#pragma GCC diagnostic ignored "-Wobjc-missing-property-synthesis"
+#pragma GCC diagnostic ignored "-Wgnu"
 
 
 #import <Availability.h>
@@ -64,14 +68,14 @@
     {
         _keys = [keys copy];
         _values = [values copy];
-        _index = [keys count] - 1;
+        _index = (NSInteger)[keys count] - 1;
     }
     return self;
 }
 
 - (id)nextObject
-{   
-    return (_index < 0)? nil: _values[_keys[_index--]];
+{
+    return (self.index < 0)? nil: self.values[self.keys[(NSUInteger)self.index--]];
 }
 
 @end
@@ -87,8 +91,8 @@
 
 @implementation OrderedDictionary
 
-- (instancetype)initWithObjects:(const id [])objects forKeys:(const id <NSCopying> [])keys count:(NSUInteger)count
-{   
+- (instancetype)initWithObjects:(const __unsafe_unretained id [])objects forKeys:(const __unsafe_unretained id <NSCopying> [])keys count:(NSUInteger)count
+{
     if ((self = [super init]))
     {
         _values = [[NSMutableDictionary alloc] initWithCapacity:count];
@@ -107,59 +111,59 @@
 }
 
 - (id)copyWithZone:(__unused NSZone *)zone
-{   
+{
     return self;
 }
 
 - (id)mutableCopyWithZone:(NSZone *)zone
-{    
-    return [[[MutableOrderedDictionary class] allocWithZone:zone] initWithDictionary:self];
+{
+    return [[MutableOrderedDictionary allocWithZone:zone] initWithDictionary:self];
 }
 
 - (NSUInteger)count
-{    
-    return [_keys count];
+{
+    return [self.keys count];
 }
 
 - (id)objectForKey:(id)key
-{    
-    return _values[key];
+{
+    return self.values[key];
 }
 
 - (NSEnumerator *)keyEnumerator
-{    
-    return [_keys objectEnumerator];
+{
+    return [self.keys objectEnumerator];
 }
 
 - (NSEnumerator *)reverseKeyEnumerator
-{    
-    return [_keys reverseObjectEnumerator];
+{
+    return [self.keys reverseObjectEnumerator];
 }
 
 - (NSEnumerator *)reverseObjectEnumerator
-{    
-    return [OrderedDictionaryReverseObjectEnumerator enumeratorWithKeys:_keys values:_values];
+{
+    return [OrderedDictionaryReverseObjectEnumerator enumeratorWithKeys:self.keys values:self.values];
 }
 
 - (void)enumerateKeysAndObjectsWithIndexUsingBlock:(void (^)(id key, id obj, NSUInteger idx, BOOL *stop))block
 {
-    [_keys enumerateObjectsUsingBlock:^(id key, NSUInteger idx, BOOL *stop) {
-        block(key, _values[key], idx, stop);
+    [self.keys enumerateObjectsUsingBlock:^(id key, NSUInteger idx, BOOL *stop) {
+        block(key, self.values[key], idx, stop);
     }];
 }
 
 - (id)keyAtIndex:(NSUInteger)index
-{    
-    return _keys[index];
+{
+    return self.keys[index];
 }
 
 - (id)objectAtIndex:(NSUInteger)index
-{    
-    return _values[_keys[index]];
+{
+    return self.values[self.keys[index]];
 }
 
 - (NSString *)descriptionForObject:(id)object locale:(id)locale indent:(NSUInteger)indent
-{    
+{
     if ([object respondsToSelector:@selector(descriptionWithLocale:indent:)])
     {
         return [object descriptionWithLocale:locale indent:indent];
@@ -175,7 +179,7 @@
 }
 
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)indent
-{    
+{
     NSMutableString *padding = [NSMutableString string];
     for (NSUInteger i = 0; i < indent; i++)
     {
@@ -184,7 +188,7 @@
     
     NSMutableString *description = [NSMutableString string];
     [description appendFormat:@"%@{\n", padding];
-    for (NSObject *key in _keys)
+    for (NSObject *key in self.keys)
     {
         [description appendFormat:@"%@    %@ = %@;\n", padding,
          [self descriptionForObject:key locale:locale indent:indent],
@@ -205,7 +209,7 @@
 }
 
 - (id)initWithCapacity:(NSUInteger)capacity
-{    
+{
     if ((self = [super init]))
     {
         self.values = [NSMutableDictionary dictionaryWithCapacity:capacity];
@@ -220,12 +224,12 @@
 }
 
 - (id)copyWithZone:(NSZone *)zone
-{    
-    return [[[OrderedDictionary class] allocWithZone:zone] initWithDictionary:self];
+{
+    return [[OrderedDictionary allocWithZone:zone] initWithDictionary:self];
 }
 
 - (void)addEntriesFromDictionary:(NSDictionary *)otherDictionary
-{    
+{
     for (id key in otherDictionary)
     {
         [self setObject:otherDictionary[key] forKey:key];
@@ -233,7 +237,7 @@
 }
 
 - (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index
-{   
+{
     if (self.values[key])
     {
         if ([self.keys[index] isEqual:key])
@@ -248,23 +252,23 @@
 }
 
 - (void)removeAllObjects
-{    
+{
     [self removeObjectsForKeys:[self allKeys]];
 }
 
 - (void)removeObjectAtIndex:(NSUInteger)index
-{    
+{
     [self removeObjectForKey:[self keyAtIndex:index]];
 }
 
 - (void)removeObjectForKey:(id)key
-{   
+{
     [self.values removeObjectForKey:key];
     [self.keys removeObject:key];
 }
 
 - (void)removeObjectsForKeys:(NSArray *)keyArray
-{    
+{
     for (id key in [keyArray copy])
     {
         [self removeObjectForKey:key];
@@ -272,7 +276,7 @@
 }
 
 - (void)setDictionary:(NSDictionary *)otherDictionary
-{    
+{
     [self removeAllObjects];
     [self addEntriesFromDictionary:otherDictionary];
 }
@@ -287,7 +291,7 @@
 }
 
 - (void)setValue:(id)value forKey:(NSString *)key
-{    
+{
     if (value)
     {
         [self setObject:value forKey:key];
