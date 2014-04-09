@@ -47,6 +47,8 @@
 - (NSEnumerator *)reverseKeyEnumerator;
 /** Returns an enumerator for backwards traversal of the dictionary objects. */
 - (NSEnumerator *)reverseObjectEnumerator;
+/** Enumerates keys ands objects with index using block. */
+- (void)enumerateKeysAndObjectsWithIndexUsingBlock:(void (^)(id key, id obj, NSUInteger idx, BOOL *stop))block;
 
 @end
 
