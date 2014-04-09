@@ -141,6 +141,13 @@
     return [OrderedDictionaryReverseObjectEnumerator enumeratorWithKeys:_keys values:_values];
 }
 
+- (void)enumerateKeysAndObjectsWithIndexUsingBlock:(void (^)(id key, id obj, NSUInteger idx, BOOL *stop))block
+{
+    [_keys enumerateObjectsUsingBlock:^(id key, NSUInteger idx, BOOL *stop) {
+        block(key, _values[key], idx, stop);
+    }];
+}
+
 - (id)keyAtIndex:(NSUInteger)index
 {    
     return _keys[index];
