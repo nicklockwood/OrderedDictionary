@@ -39,10 +39,14 @@
  */
 @interface OrderedDictionary : NSDictionary
 
+- (instancetype)initWithContentsOfFile:(NSString *)path;
+
 /** Returns the nth key in the dictionary. */
 - (id)keyAtIndex:(NSUInteger)index;
 /** Returns the nth object in the dictionary. */
 - (id)objectAtIndex:(NSUInteger)index;
+/** Returns the index of the provided key. NSNotFound if key is not present */
+- (NSUInteger)indexOfKey:(id)key;
 /** Returns an enumerator for backwards traversal of the dictionary keys. */
 - (NSEnumerator *)reverseKeyEnumerator;
 /** Returns an enumerator for backwards traversal of the dictionary objects. */
@@ -72,12 +76,13 @@
 - (void)removeObjectsForKeys:(NSArray *)keyArray;
 - (void)setDictionary:(NSDictionary *)otherDictionary;
 - (void)setObject:(id)object forKey:(id)key;
-- (void)setValue:(id)value forKey:(NSString *)key;
 - (void)setObject:(id)object forKeyedSubscript:(NSString *)key;
 
 /** Inserts an object at a specific index in the dictionary. */
 - (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index;
 /** Removes the nth object in the dictionary. */
 - (void)removeObjectAtIndex:(NSUInteger)index;
+/** Removes the objects at the indices in the provided index set. The indexSet MUST be ordered in ascending order. */
+- (void)removeObjectsAtIndices:(NSIndexSet *)indexSet;
 
 @end
