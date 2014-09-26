@@ -45,24 +45,24 @@
 
 @interface OrderedDictionaryReverseObjectEnumerator : NSEnumerator
 
-@property (nonatomic, copy) NSArray *keys;
+@property (nonatomic, copy) NSOrderedSet *keys;
 @property (nonatomic, copy) NSDictionary *values;
 @property (nonatomic, assign) NSInteger index;
 
-+ (id)enumeratorWithKeys:(NSArray *)keys values:(NSDictionary *)values;
-- (id)initWithKeys:(NSArray *)keys values:(NSDictionary *)values;
++ (id)enumeratorWithKeys:(NSOrderedSet *)keys values:(NSDictionary *)values;
+- (id)initWithKeys:(NSOrderedSet *)keys values:(NSDictionary *)values;
 
 @end
 
 
 @implementation OrderedDictionaryReverseObjectEnumerator
 
-+ (id)enumeratorWithKeys:(NSArray *)keys values:(NSDictionary *)values
++ (id)enumeratorWithKeys:(NSOrderedSet *)keys values:(NSDictionary *)values
 {
     return [[self alloc] initWithKeys:keys values:values];
 }
 
-- (id)initWithKeys:(NSArray *)keys values:(NSDictionary *)values
+- (id)initWithKeys:(NSOrderedSet *)keys values:(NSDictionary *)values
 {
     if ((self = [super init]))
     {
@@ -83,29 +83,65 @@
 
 @interface OrderedDictionary ()
 
-@property (nonatomic, strong) NSMutableDictionary *values;
-@property (nonatomic, strong) NSMutableArray *keys;
+@property (nonatomic, strong) NSDictionary *values;
+@property (nonatomic, strong) NSOrderedSet *keys;
 
 @end
 
 
 @implementation OrderedDictionary
 
+- (Class)classForKeyedArchiver {
+    return [OrderedDictionary class];
+}
+
+- (Class)classForCoder {
+    return [OrderedDictionary class];
+}
+
+- (instancetype)initWithContentsOfFile:(NSString *)path {
+    self = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+    return self;
+}
+
+- (BOOL)writeToFile:(NSString *)path atomically:(BOOL)useAuxiliaryFile {
+    return [NSKeyedArchiver archiveRootObject:self toFile:path];
+}
+
+- (void)encodeWithCoder:(NSCoder *)aCoder {
+    [aCoder encodeObject:self.values forKey:@"values"];
+    [aCoder encodeObject:self.keys forKey:@"keys"];
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+    self = [super init];
+    
+    if (self) {
+        _values = [aDecoder decodeObjectForKey:@"values"];
+        _keys = [aDecoder decodeObjectForKey:@"keys"];
+    }
+    
+    return self;
+}
+
 - (instancetype)initWithObjects:(const __unsafe_unretained id [])objects forKeys:(const __unsafe_unretained id <NSCopying> [])keys count:(NSUInteger)count
 {
     if ((self = [super init]))
     {
-        _values = [[NSMutableDictionary alloc] initWithCapacity:count];
-        _keys = [[NSMutableArray alloc] initWithCapacity:count];
+        NSMutableDictionary *values_ = [[NSMutableDictionary alloc] initWithCapacity:count];
+        NSMutableOrderedSet *keys_ = [[NSMutableOrderedSet alloc] initWithCapacity:count];
         
         for (NSUInteger i = 0; i < count; i++)
         {
-            if (!_values[keys[i]])
+            if (!values_[keys[i]])
             {
-                [_keys addObject:keys[i]];
+                [keys_ addObject:keys[i]];
             }
-            _values[keys[i]] = objects[i];
+            values_[keys[i]] = objects[i];
         }
+        
+        self.keys = keys_.copy;
+        self.values = values_.copy;
     }
     return self;
 }
@@ -120,6 +156,14 @@
     return [[MutableOrderedDictionary allocWithZone:zone] initWithDictionary:self];
 }
 
+- (NSArray *)allKeys {
+    return self.keys.array;
+}
+
+- (NSArray *)allValues {
+    return self.values.allValues;
+}
+
 - (NSUInteger)count
 {
     return [self.keys count];
@@ -128,6 +172,10 @@
 - (id)objectForKey:(id)key
 {
     return self.values[key];
+}
+
+- (id)objectForKeyedSubscript:(id)key {
+    return [self objectForKey:key];
 }
 
 - (NSEnumerator *)keyEnumerator
@@ -155,6 +203,10 @@
 - (id)keyAtIndex:(NSUInteger)index
 {
     return self.keys[index];
+}
+
+- (NSUInteger)indexOfKey:(id)key {
+    return [self.keys indexOfObject:key];
 }
 
 - (id)objectAtIndex:(NSUInteger)index
@@ -201,11 +253,48 @@
 @end
 
 
+@interface MutableOrderedDictionary ()
+
+@property (nonatomic, strong) NSMutableDictionary *values;
+@property (nonatomic, strong) NSMutableOrderedSet *keys;
+
+@end
+
 @implementation MutableOrderedDictionary
+
+- (Class)classForKeyedArchiver {
+    return [MutableOrderedDictionary class];
+}
+
+- (Class)classForCoder {
+    return [MutableOrderedDictionary class];
+}
 
 + (id)dictionaryWithCapacity:(NSUInteger)count
 {
     return [[self alloc] initWithCapacity:count];
+}
+
+- (instancetype)initWithObjects:(const __unsafe_unretained id [])objects forKeys:(const __unsafe_unretained id <NSCopying> [])keys count:(NSUInteger)count
+{
+    if ((self = [super init]))
+    {
+        NSMutableDictionary *values_ = [[NSMutableDictionary alloc] initWithCapacity:count];
+        NSMutableOrderedSet *keys_ = [[NSMutableOrderedSet alloc] initWithCapacity:count];
+        
+        for (NSUInteger i = 0; i < count; i++)
+        {
+            if (!values_[keys[i]])
+            {
+                [keys_ addObject:keys[i]];
+            }
+            values_[keys[i]] = objects[i];
+        }
+        
+        self.keys = keys_;
+        self.values = values_;
+    }
+    return self;
 }
 
 - (id)initWithCapacity:(NSUInteger)capacity
@@ -213,7 +302,7 @@
     if ((self = [super init]))
     {
         self.values = [NSMutableDictionary dictionaryWithCapacity:capacity];
-        self.keys = [NSMutableArray arrayWithCapacity:capacity];
+        self.keys = [NSMutableOrderedSet orderedSetWithCapacity:capacity];
     }
     return self;
 }
@@ -254,6 +343,15 @@
 - (void)removeAllObjects
 {
     [self removeObjectsForKeys:[self allKeys]];
+}
+
+- (void)removeObjectsAtIndices:(NSIndexSet *)indexSet {
+    __block NSUInteger deleted = 0;
+    
+    [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+        [self removeObjectAtIndex:idx-deleted];
+        deleted++;
+    }];
 }
 
 - (void)removeObjectAtIndex:(NSUInteger)index
