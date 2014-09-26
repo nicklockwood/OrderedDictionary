@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.m
 //
-//  Version 1.1.1
+//  Version 1.2 beta
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design
@@ -34,6 +34,7 @@
 
 
 #pragma GCC diagnostic ignored "-Wobjc-missing-property-synthesis"
+#pragma GCC diagnostic ignored "-Wdirect-ivar-access"
 #pragma GCC diagnostic ignored "-Wgnu"
 
 
@@ -43,71 +44,37 @@
 #endif
 
 
-@interface OrderedDictionaryReverseObjectEnumerator : NSEnumerator
-
-@property (nonatomic, copy) NSArray *keys;
-@property (nonatomic, copy) NSDictionary *values;
-@property (nonatomic, assign) NSInteger index;
-
-+ (id)enumeratorWithKeys:(NSArray *)keys values:(NSDictionary *)values;
-- (id)initWithKeys:(NSArray *)keys values:(NSDictionary *)values;
-
-@end
-
-
-@implementation OrderedDictionaryReverseObjectEnumerator
-
-+ (id)enumeratorWithKeys:(NSArray *)keys values:(NSDictionary *)values
-{
-    return [[self alloc] initWithKeys:keys values:values];
-}
-
-- (id)initWithKeys:(NSArray *)keys values:(NSDictionary *)values
-{
-    if ((self = [super init]))
-    {
-        _keys = [keys copy];
-        _values = [values copy];
-        _index = (NSInteger)[keys count] - 1;
-    }
-    return self;
-}
-
-- (id)nextObject
-{
-    return (self.index < 0)? nil: self.values[self.keys[(NSUInteger)self.index--]];
-}
-
-@end
-
-
-@interface OrderedDictionary ()
-
-@property (nonatomic, strong) NSMutableDictionary *values;
-@property (nonatomic, strong) NSMutableArray *keys;
-
-@end
-
-
 @implementation OrderedDictionary
+{
+@protected
+    NSArray *_values;
+    NSOrderedSet *_keys;
+}
 
 - (instancetype)initWithObjects:(const __unsafe_unretained id [])objects forKeys:(const __unsafe_unretained id <NSCopying> [])keys count:(NSUInteger)count
 {
     if ((self = [super init]))
     {
-        _values = [[NSMutableDictionary alloc] initWithCapacity:count];
-        _keys = [[NSMutableArray alloc] initWithCapacity:count];
-        
-        for (NSUInteger i = 0; i < count; i++)
-        {
-            if (!_values[keys[i]])
-            {
-                [_keys addObject:keys[i]];
-            }
-            _values[keys[i]] = objects[i];
-        }
+        _values = [[NSArray alloc] initWithObjects:objects count:count];
+        _keys = [[NSOrderedSet alloc] initWithObjects:keys count:count];
     }
     return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder
+{
+    if ((self = [super init]))
+    {
+        _values = [decoder decodeObjectOfClass:[NSArray class] forKey:@"values"];
+        _keys = [decoder decodeObjectOfClass:[NSOrderedSet class] forKey:@"keys"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [coder encodeObject:_values forKey:@"values"];
+    [coder encodeObject:_keys forKey:@"values"];
 }
 
 - (id)copyWithZone:(__unused NSZone *)zone
@@ -122,47 +89,57 @@
 
 - (NSUInteger)count
 {
-    return [self.keys count];
+    return [_keys count];
 }
 
 - (id)objectForKey:(id)key
 {
-    return self.values[key];
+    return _values[[_keys indexOfObject:key]];
 }
 
 - (NSEnumerator *)keyEnumerator
 {
-    return [self.keys objectEnumerator];
+    return [_keys objectEnumerator];
 }
 
 - (NSEnumerator *)reverseKeyEnumerator
 {
-    return [self.keys reverseObjectEnumerator];
+    return [_keys reverseObjectEnumerator];
+}
+
+- (NSEnumerator *)objectEnumerator
+{
+    return [_values objectEnumerator];
 }
 
 - (NSEnumerator *)reverseObjectEnumerator
 {
-    return [OrderedDictionaryReverseObjectEnumerator enumeratorWithKeys:self.keys values:self.values];
+    return [_values reverseObjectEnumerator];
 }
 
 - (void)enumerateKeysAndObjectsWithIndexUsingBlock:(void (^)(id key, id obj, NSUInteger idx, BOOL *stop))block
 {
-    [self.keys enumerateObjectsUsingBlock:^(id key, NSUInteger idx, BOOL *stop) {
-        block(key, self.values[key], idx, stop);
+    [_keys enumerateObjectsUsingBlock:^(id key, NSUInteger idx, BOOL *stop) {
+        block(key, self->_values[idx], idx, stop);
     }];
 }
 
 - (id)keyAtIndex:(NSUInteger)index
 {
-    return self.keys[index];
+    return _keys[index];
 }
 
 - (id)objectAtIndex:(NSUInteger)index
 {
-    return self.values[self.keys[index]];
+    return _values[index];
 }
 
-- (NSString *)descriptionForObject:(id)object locale:(id)locale indent:(NSUInteger)indent
+- (id)objectAtIndexedSubscript:(NSUInteger)index
+{
+  return _values[index];
+}
+
+static NSString *descriptionForObject(id object, id locale, NSUInteger indent)
 {
     if ([object respondsToSelector:@selector(descriptionWithLocale:indent:)])
     {
@@ -188,11 +165,13 @@
     
     NSMutableString *description = [NSMutableString string];
     [description appendFormat:@"%@{\n", padding];
-    for (NSObject *key in self.keys)
+  
+    NSUInteger index = 0;
+    for (NSObject *key in _keys)
     {
         [description appendFormat:@"%@    %@ = %@;\n", padding,
-         [self descriptionForObject:key locale:locale indent:indent],
-         [self descriptionForObject:self[key] locale:locale indent:indent]];
+         descriptionForObject(key, locale, indent),
+         descriptionForObject(_values[index ++], locale, indent)];
     }
     [description appendFormat:@"%@}\n", padding];
     return description;
@@ -203,17 +182,27 @@
 
 @implementation MutableOrderedDictionary
 
-+ (id)dictionaryWithCapacity:(NSUInteger)count
++ (instancetype)dictionaryWithCapacity:(NSUInteger)count
 {
-    return [[self alloc] initWithCapacity:count];
+    return [(MutableOrderedDictionary *)[self alloc] initWithCapacity:count];
+}
+
+- (instancetype)initWithObjects:(const __unsafe_unretained id [])objects forKeys:(const __unsafe_unretained id <NSCopying> [])keys count:(NSUInteger)count
+{
+    if ((self = [super init]))
+    {
+        self->_values = [[NSMutableArray alloc] initWithObjects:objects count:count];
+        self->_keys = [[NSMutableOrderedSet alloc] initWithObjects:keys count:count];
+    }
+    return self;
 }
 
 - (id)initWithCapacity:(NSUInteger)capacity
 {
     if ((self = [super init]))
     {
-        self.values = [NSMutableDictionary dictionaryWithCapacity:capacity];
-        self.keys = [NSMutableArray arrayWithCapacity:capacity];
+        _values = [[NSMutableArray alloc] initWithCapacity:capacity];
+        _keys = [[NSMutableOrderedSet alloc] initWithCapacity:capacity];
     }
     return self;
 }
@@ -223,6 +212,16 @@
     return [self initWithCapacity:0];
 }
 
+- (instancetype)initWithCoder:(NSCoder *)decoder
+{
+    if ((self = [super init]))
+    {
+        _values = [decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"values"];
+        _keys = [decoder decodeObjectOfClass:[NSMutableOrderedSet class] forKey:@"keys"];
+    }
+    return self;
+}
+
 - (id)copyWithZone:(NSZone *)zone
 {
     return [[OrderedDictionary allocWithZone:zone] initWithDictionary:self];
@@ -230,41 +229,47 @@
 
 - (void)addEntriesFromDictionary:(NSDictionary *)otherDictionary
 {
-    for (id key in otherDictionary)
-    {
-        [self setObject:otherDictionary[key] forKey:key];
-    }
+    [otherDictionary enumerateKeysAndObjectsUsingBlock:^(id key, id obj, __unused BOOL *stop) {
+        [self setObject:obj forKey:key];
+    }];
 }
 
 - (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index
 {
-    if (self.values[key])
-    {
-        if ([self.keys[index] isEqual:key])
-        {
-            self.values[key] = object;
-            return;
-        }
-        [self removeObjectForKey:key];
-    }
-    [self.keys insertObject:key atIndex:index];
-    self.values[key] = object;
+    [self removeObjectForKey:key];
+    [(NSMutableOrderedSet *)_keys insertObject:key atIndex:index];
+    [(NSMutableArray *)_values insertObject:object atIndex:index];
+}
+
+- (void)replaceObjectAtIndex:(NSUInteger)index withObject:(id)object
+{
+    ((NSMutableArray *)_values)[index] = object;
+}
+
+- (void)setObject:(id)object atIndexedSubscript:(NSUInteger)index
+{
+    ((NSMutableArray *)_values)[index] = object;
 }
 
 - (void)removeAllObjects
 {
-    [self removeObjectsForKeys:[self allKeys]];
+    [(NSMutableOrderedSet *)_keys removeAllObjects];
+    [(NSMutableArray *)_values removeAllObjects];
 }
 
 - (void)removeObjectAtIndex:(NSUInteger)index
 {
-    [self removeObjectForKey:[self keyAtIndex:index]];
+    [(NSMutableOrderedSet *)_keys removeObjectAtIndex:index];
+    [(NSMutableArray *)_values removeObjectAtIndex:index];
 }
 
 - (void)removeObjectForKey:(id)key
 {
-    [self.values removeObjectForKey:key];
-    [self.keys removeObject:key];
+    NSUInteger index = [self->_keys indexOfObject:key];
+    if (index != NSNotFound)
+    {
+        [self removeObjectAtIndex:index];
+    }
 }
 
 - (void)removeObjectsForKeys:(NSArray *)keyArray
@@ -277,17 +282,23 @@
 
 - (void)setDictionary:(NSDictionary *)otherDictionary
 {
-    [self removeAllObjects];
-    [self addEntriesFromDictionary:otherDictionary];
+    [(NSMutableOrderedSet *)_keys removeAllObjects];
+    [(NSMutableOrderedSet *)_keys addObjectsFromArray:[otherDictionary allKeys]];
+    [(NSMutableArray *)_values setArray:[otherDictionary allValues]];
 }
 
 - (void)setObject:(id)object forKey:(id)key
 {
-    if (!self.values[key])
+    NSUInteger index = [_keys indexOfObject:key];
+    if (index != NSNotFound)
     {
-        [self.keys addObject:key];
+        ((NSMutableArray *)_values)[index] = object;
     }
-    self.values[key] = object;
+    else
+    {
+        [(NSMutableOrderedSet *)_keys addObject:key];
+        [(NSMutableArray *)_values addObject:object];
+    }
 }
 
 - (void)setValue:(id)value forKey:(NSString *)key
@@ -302,9 +313,9 @@
     }
 }
 
-- (void)setObject:(id)object forKeyedSubscript:(NSString *)key
+- (void)setObject:(id)object forKeyedSubscript:(id <NSCopying>)key
 {
-    [self setValue:object forKey:key];
+    [self setObject:object forKey:key];
 }
 
 @end

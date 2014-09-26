@@ -7,7 +7,7 @@ The order of objects stored in an NSDictionary is undefined. Often it is useful 
 Supported OS & SDK Versions
 -----------------------------
 
-* Supported build target - iOS 7.1 / Mac OS 10.9 (Xcode 5.1, Apple LLVM compiler 5.1)
+* Supported build target - iOS 8.0 / Mac OS 10.9 (Xcode 6.0, Apple LLVM compiler 6.0)
 * Earliest supported deployment target - iOS 5.0 / Mac OS 10.7
 * Earliest compatible deployment target - iOS 4.3 / Mac OS 10.6
 
@@ -36,6 +36,13 @@ To install OrderedDictionary into your app, drag the OrderedDictionary.h and .m 
 
 Release Notes
 ---------------
+
+Version 1.2 beta
+
+- Added unit tests
+- Added replaceObjectAtIndex:withObject: and setObject:atIndexedSubscript:
+- setObject:forKeyedSubscript: now works with non-string keys
+- Now uses NSOrderedSet internally, for better performance
 
 Version 1.1.1
 

@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.h
 //
-//  Version 1.1.1
+//  Version 1.2 beta
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design
@@ -43,6 +43,7 @@
 - (id)keyAtIndex:(NSUInteger)index;
 /** Returns the nth object in the dictionary. */
 - (id)objectAtIndex:(NSUInteger)index;
+- (id)objectAtIndexedSubscript:(NSUInteger)index;
 /** Returns an enumerator for backwards traversal of the dictionary keys. */
 - (NSEnumerator *)reverseKeyEnumerator;
 /** Returns an enumerator for backwards traversal of the dictionary objects. */
@@ -63,8 +64,8 @@
  */
 @interface MutableOrderedDictionary : OrderedDictionary
 
-+ (id)dictionaryWithCapacity:(NSUInteger)count;
-- (id)initWithCapacity:(NSUInteger)count;
++ (instancetype)dictionaryWithCapacity:(NSUInteger)count;
+- (instancetype)initWithCapacity:(NSUInteger)count;
 
 - (void)addEntriesFromDictionary:(NSDictionary *)otherDictionary;
 - (void)removeAllObjects;
@@ -72,11 +73,13 @@
 - (void)removeObjectsForKeys:(NSArray *)keyArray;
 - (void)setDictionary:(NSDictionary *)otherDictionary;
 - (void)setObject:(id)object forKey:(id)key;
-- (void)setValue:(id)value forKey:(NSString *)key;
-- (void)setObject:(id)object forKeyedSubscript:(NSString *)key;
+- (void)setObject:(id)object forKeyedSubscript:(id <NSCopying>)key;
 
 /** Inserts an object at a specific index in the dictionary. */
 - (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index;
+/** Replace an object at a specific index in the dictionary. */
+- (void)replaceObjectAtIndex:(NSUInteger)index withObject:(id)object;
+- (void)setObject:(id)object atIndexedSubscript:(NSUInteger)index;
 /** Removes the nth object in the dictionary. */
 - (void)removeObjectAtIndex:(NSUInteger)index;
 
