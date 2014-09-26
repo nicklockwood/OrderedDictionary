@@ -76,7 +76,6 @@
 - (void)removeObjectsForKeys:(NSArray *)keyArray;
 - (void)setDictionary:(NSDictionary *)otherDictionary;
 - (void)setObject:(id)object forKey:(id)key;
-- (void)setValue:(id)value forKey:(NSString *)key;
 - (void)setObject:(id)object forKeyedSubscript:(NSString *)key;
 
 /** Inserts an object at a specific index in the dictionary. */

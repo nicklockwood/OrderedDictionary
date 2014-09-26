@@ -46,36 +46,40 @@
 @interface OrderedDictionaryReverseObjectEnumerator : NSEnumerator
 
 @property (nonatomic, copy) NSOrderedSet *keys;
-@property (nonatomic, copy) NSDictionary *values;
+@property (nonatomic, copy) NSOrderedSet *values;
 @property (nonatomic, assign) NSInteger index;
 
-+ (id)enumeratorWithKeys:(NSOrderedSet *)keys values:(NSDictionary *)values;
-- (id)initWithKeys:(NSOrderedSet *)keys values:(NSDictionary *)values;
++ (instancetype)enumeratorWithKeys:(NSOrderedSet *)keys values:(NSOrderedSet *)values;
+- (instancetype)initWithKeys:(NSOrderedSet *)keys values:(NSOrderedSet *)values;
 
 @end
 
 
 @implementation OrderedDictionaryReverseObjectEnumerator
 
-+ (id)enumeratorWithKeys:(NSOrderedSet *)keys values:(NSDictionary *)values
++ (instancetype)enumeratorWithKeys:(NSOrderedSet *)keys values:(NSOrderedSet *)values
 {
     return [[self alloc] initWithKeys:keys values:values];
 }
 
-- (id)initWithKeys:(NSOrderedSet *)keys values:(NSDictionary *)values
+- (instancetype)initWithKeys:(NSOrderedSet *)keys values:(NSOrderedSet *)values
 {
     if ((self = [super init]))
     {
         _keys = [keys copy];
         _values = [values copy];
-        _index = (NSInteger)[keys count] - 1;
+        _index = (NSInteger)[keys count]-1;
     }
     return self;
 }
 
 - (id)nextObject
 {
-    return (self.index < 0)? nil: self.values[self.keys[(NSUInteger)self.index--]];
+    id object = (self.index >= 0 ? self.values[self.index] : nil);
+    if (self.index) {
+        self.index--;
+    }
+    return object;
 }
 
 @end
@@ -83,7 +87,7 @@
 
 @interface OrderedDictionary ()
 
-@property (nonatomic, strong) NSDictionary *values;
+@property (nonatomic, strong) NSOrderedSet *values;
 @property (nonatomic, strong) NSOrderedSet *keys;
 
 @end
@@ -128,16 +132,19 @@
 {
     if ((self = [super init]))
     {
-        NSMutableDictionary *values_ = [[NSMutableDictionary alloc] initWithCapacity:count];
+        NSMutableOrderedSet *values_ = [[NSMutableOrderedSet alloc] initWithCapacity:count];
         NSMutableOrderedSet *keys_ = [[NSMutableOrderedSet alloc] initWithCapacity:count];
         
-        for (NSUInteger i = 0; i < count; i++)
-        {
-            if (!values_[keys[i]])
-            {
-                [keys_ addObject:keys[i]];
+        for (NSUInteger i = 0; i < count; i++) {
+            id key = keys[i];
+            
+            NSUInteger check = keys_.count;
+            
+            [keys_ addObject:key];
+            
+            if (keys_.count > check) {
+                [values_ addObject:objects[i]];
             }
-            values_[keys[i]] = objects[i];
         }
         
         self.keys = keys_.copy;
@@ -161,7 +168,7 @@
 }
 
 - (NSArray *)allValues {
-    return self.values.allValues;
+    return self.values.array;
 }
 
 - (NSUInteger)count
@@ -171,7 +178,12 @@
 
 - (id)objectForKey:(id)key
 {
-    return self.values[key];
+    NSUInteger index = [self indexOfKey:key];
+    if (index != NSNotFound) {
+        return self.values[index];
+    }
+    
+    return nil;
 }
 
 - (id)objectForKeyedSubscript:(id)key {
@@ -196,7 +208,7 @@
 - (void)enumerateKeysAndObjectsWithIndexUsingBlock:(void (^)(id key, id obj, NSUInteger idx, BOOL *stop))block
 {
     [self.keys enumerateObjectsUsingBlock:^(id key, NSUInteger idx, BOOL *stop) {
-        block(key, self.values[key], idx, stop);
+        block(key, [self valueForKey:key], idx, stop);
     }];
 }
 
@@ -211,7 +223,7 @@
 
 - (id)objectAtIndex:(NSUInteger)index
 {
-    return self.values[self.keys[index]];
+    return self.values[index];
 }
 
 - (NSString *)descriptionForObject:(id)object locale:(id)locale indent:(NSUInteger)indent
@@ -255,7 +267,7 @@
 
 @interface MutableOrderedDictionary ()
 
-@property (nonatomic, strong) NSMutableDictionary *values;
+@property (nonatomic, strong) NSMutableOrderedSet *values;
 @property (nonatomic, strong) NSMutableOrderedSet *keys;
 
 @end
@@ -279,16 +291,19 @@
 {
     if ((self = [super init]))
     {
-        NSMutableDictionary *values_ = [[NSMutableDictionary alloc] initWithCapacity:count];
+        NSMutableOrderedSet *values_ = [[NSMutableOrderedSet alloc] initWithCapacity:count];
         NSMutableOrderedSet *keys_ = [[NSMutableOrderedSet alloc] initWithCapacity:count];
         
-        for (NSUInteger i = 0; i < count; i++)
-        {
-            if (!values_[keys[i]])
-            {
-                [keys_ addObject:keys[i]];
+        for (NSUInteger i = 0; i < count; i++) {
+            id key = keys[i];
+            
+            NSUInteger check = keys_.count;
+            
+            [keys_ addObject:key];
+            
+            if (keys_.count > check) {
+                [values_ addObject:objects[i]];
             }
-            values_[keys[i]] = objects[i];
         }
         
         self.keys = keys_;
@@ -296,12 +311,11 @@
     }
     return self;
 }
-
 - (id)initWithCapacity:(NSUInteger)capacity
 {
     if ((self = [super init]))
     {
-        self.values = [NSMutableDictionary dictionaryWithCapacity:capacity];
+        self.values = [NSMutableOrderedSet orderedSetWithCapacity:capacity];
         self.keys = [NSMutableOrderedSet orderedSetWithCapacity:capacity];
     }
     return self;
@@ -325,24 +339,19 @@
     }
 }
 
-- (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index
-{
-    if (self.values[key])
-    {
-        if ([self.keys[index] isEqual:key])
-        {
-            self.values[key] = object;
-            return;
-        }
-        [self removeObjectForKey:key];
+- (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index {
+    if ([self.keys containsObject:key]) {
+        return;
     }
+    
     [self.keys insertObject:key atIndex:index];
-    self.values[key] = object;
+    [self.values insertObject:object atIndex:index];
 }
 
 - (void)removeAllObjects
 {
-    [self removeObjectsForKeys:[self allKeys]];
+    [self.values removeAllObjects];
+    [self.keys removeAllObjects];
 }
 
 - (void)removeObjectsAtIndices:(NSIndexSet *)indexSet {
@@ -359,15 +368,17 @@
     [self removeObjectForKey:[self keyAtIndex:index]];
 }
 
-- (void)removeObjectForKey:(id)key
-{
-    [self.values removeObjectForKey:key];
-    [self.keys removeObject:key];
+- (void)removeObjectForKey:(id)key {
+    NSUInteger index = [self indexOfKey:key];
+    if (index != NSNotFound) {
+        [self.keys removeObjectAtIndex:index];
+        [self.values removeObjectAtIndex:index];
+    }
 }
 
 - (void)removeObjectsForKeys:(NSArray *)keyArray
 {
-    for (id key in [keyArray copy])
+    for (id key in keyArray)
     {
         [self removeObjectForKey:key];
     }
@@ -381,28 +392,25 @@
 
 - (void)setObject:(id)object forKey:(id)key
 {
-    if (!self.values[key])
-    {
-        [self.keys addObject:key];
-    }
-    self.values[key] = object;
-}
-
-- (void)setValue:(id)value forKey:(NSString *)key
-{
-    if (value)
-    {
-        [self setObject:value forKey:key];
-    }
-    else
-    {
+    if (!object) {
         [self removeObjectForKey:key];
+        return;
+    }
+    
+    NSUInteger index = [self indexOfKey:key];
+    if (index != NSNotFound) {
+        self.keys[index] = key;
+        self.values[index] = object;
+    }
+    else {
+        [self.keys addObject:key];
+        [self.values addObject:object];
     }
 }
 
 - (void)setObject:(id)object forKeyedSubscript:(NSString *)key
 {
-    [self setValue:object forKey:key];
+    [self setObject:object forKey:key];
 }
 
 @end
