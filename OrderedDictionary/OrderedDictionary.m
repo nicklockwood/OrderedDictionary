@@ -257,6 +257,14 @@ NS_INLINE NSString *descriptionForObject(id object, id locale, NSUInteger indent
 
 @implementation MutableOrderedDictionary
 
+- (Class)classForKeyedArchiver {
+    return [MutableOrderedDictionary class];
+}
+
+- (Class)classForCoder {
+    return [MutableOrderedDictionary class];
+}
+
 - (instancetype)initWithContentsOfFile:(NSString *)path {
     self = [super init];
     
