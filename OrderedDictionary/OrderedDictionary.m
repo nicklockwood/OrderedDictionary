@@ -157,6 +157,10 @@
     return [_keys count];
 }
 
+- (NSUInteger)indexOfKey:(id)key {
+    return [_keys indexOfObject:key];
+}
+
 - (id)objectForKey:(id)key
 {
     return _values[[_keys indexOfObject:key]];
