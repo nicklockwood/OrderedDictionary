@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.h
 //
-//  Version 1.1.1
+//  Version 1.2 beta
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design
@@ -39,13 +39,21 @@
  */
 @interface OrderedDictionary : NSDictionary
 
-- (instancetype)initWithContentsOfFile:(NSString *)path;
+/**
+ Only reads files written with the writeToOrderedFile:atomically: method.
+ */
+- (instancetype)initWithContentsOfOrderedFile:(NSString *)path;
+/**
+ Writes the contents to a file, respecting the order of keys and values. The data written using this method can only be read with the initWithContentsOfOrderedFile: method.
+ */
+- (BOOL)writeToOrderedFile:(NSString *)path atomically:(BOOL)useAuxiliaryFile;
 
 /** Returns the nth key in the dictionary. */
 - (id)keyAtIndex:(NSUInteger)index;
 /** Returns the nth object in the dictionary. */
 - (id)objectAtIndex:(NSUInteger)index;
-/** Returns the index of the provided key. NSNotFound if key is not present */
+- (id)objectAtIndexedSubscript:(NSUInteger)index;
+/** Returns the index of the provided key. NSNotFound if key is not present. */
 - (NSUInteger)indexOfKey:(id)key;
 /** Returns an enumerator for backwards traversal of the dictionary keys. */
 - (NSEnumerator *)reverseKeyEnumerator;
@@ -67,8 +75,8 @@
  */
 @interface MutableOrderedDictionary : OrderedDictionary
 
-+ (id)dictionaryWithCapacity:(NSUInteger)count;
-- (id)initWithCapacity:(NSUInteger)count;
++ (instancetype)dictionaryWithCapacity:(NSUInteger)count;
+- (instancetype)initWithCapacity:(NSUInteger)count;
 
 - (void)addEntriesFromDictionary:(NSDictionary *)otherDictionary;
 - (void)removeAllObjects;
@@ -76,13 +84,14 @@
 - (void)removeObjectsForKeys:(NSArray *)keyArray;
 - (void)setDictionary:(NSDictionary *)otherDictionary;
 - (void)setObject:(id)object forKey:(id)key;
-- (void)setObject:(id)object forKeyedSubscript:(NSString *)key;
+- (void)setObject:(id)object forKeyedSubscript:(id <NSCopying>)key;
 
 /** Inserts an object at a specific index in the dictionary. */
 - (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index;
+/** Replace an object at a specific index in the dictionary. */
+- (void)replaceObjectAtIndex:(NSUInteger)index withObject:(id)object;
+- (void)setObject:(id)object atIndexedSubscript:(NSUInteger)index;
 /** Removes the nth object in the dictionary. */
 - (void)removeObjectAtIndex:(NSUInteger)index;
-/** Removes the objects at the indices in the provided index set. The indexSet MUST be ordered in ascending order. */
-- (void)removeObjectsAtIndices:(NSIndexSet *)indexSet;
 
 @end
