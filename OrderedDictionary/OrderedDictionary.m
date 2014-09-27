@@ -126,7 +126,7 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [coder encodeObject:_values forKey:@"values"];
-    [coder encodeObject:_keys forKey:@"values"];
+    [coder encodeObject:_keys forKey:@"keys"];
 }
 
 - (instancetype)copyWithZone:(NSZone *)zone
@@ -163,7 +163,13 @@
 
 - (id)objectForKey:(id)key
 {
-    return _values[[_keys indexOfObject:key]];
+    NSUInteger index = [_keys indexOfObject:key];
+    if (index != NSNotFound) {
+        return _values[index];
+    }
+    
+    return nil;
+   
 }
 
 - (NSEnumerator *)keyEnumerator
