@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.h
 //
-//  Version 1.2 beta
+//  Version 1.2
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design
@@ -39,11 +39,16 @@
  */
 @interface OrderedDictionary : NSDictionary
 
++ (instancetype)dictionaryWithContentsOfFile:(NSString *)path;
++ (instancetype)dictionaryWithContentsOfURL:(NSURL *)url;
+
 /** Returns the nth key in the dictionary. */
 - (id)keyAtIndex:(NSUInteger)index;
 /** Returns the nth object in the dictionary. */
 - (id)objectAtIndex:(NSUInteger)index;
 - (id)objectAtIndexedSubscript:(NSUInteger)index;
+/** Returns the index of the specified key, or NSNotFound if key is not found. */
+- (NSUInteger)indexOfKey:(id)key;
 /** Returns an enumerator for backwards traversal of the dictionary keys. */
 - (NSEnumerator *)reverseKeyEnumerator;
 /** Returns an enumerator for backwards traversal of the dictionary objects. */

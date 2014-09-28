@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/nicklockwood/OrderedDictionary.svg)](https://travis-ci.org/nicklockwood/OrderedDictionary)
+
+
 Purpose
 --------------
 
@@ -37,12 +40,15 @@ To install OrderedDictionary into your app, drag the OrderedDictionary.h and .m 
 Release Notes
 ---------------
 
-Version 1.2 beta
+Version 1.2
 
-- Added unit tests
+- Now supports NSCoding
+- Now supports reading and writing from a property list (order and mutability preserved)
+- Added keyAtIndex: method
 - Added replaceObjectAtIndex:withObject: and setObject:atIndexedSubscript:
 - setObject:forKeyedSubscript: now works with non-string keys
 - Now uses NSOrderedSet internally, for better performance
+- Added unit tests
 
 Version 1.1.1
 

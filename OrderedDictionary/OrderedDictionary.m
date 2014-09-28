@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.m
 //
-//  Version 1.2 beta
+//  Version 1.2
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design
@@ -51,17 +51,57 @@
     NSOrderedSet *_keys;
 }
 
++ (instancetype)dictionaryWithContentsOfFile:(NSString *)path
+{
+    return [self dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
+}
+
++ (instancetype)dictionaryWithContentsOfURL:(NSURL *)url
+{
+    return [self dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfURL:url]];
+}
+
+- (instancetype)initWithContentsOfFile:(NSString *)path
+{
+    return [self initWithDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
+}
+
+- (instancetype)initWithContentsOfURL:(NSURL *)url
+{
+    return [self initWithDictionary:[NSDictionary dictionaryWithContentsOfURL:url]];
+}
+
+- (instancetype)initWithObjects:(NSArray *)objects forKeys:(NSArray *)keys
+{
+    if ((self = [super init]))
+    {
+        _values = [objects copy];
+        _keys = [NSOrderedSet orderedSetWithArray:keys];
+        
+        NSParameterAssert([_keys count] == [_values count]);
+    }
+    return self;
+}
+
 - (instancetype)initWithObjects:(const __unsafe_unretained id [])objects forKeys:(const __unsafe_unretained id <NSCopying> [])keys count:(NSUInteger)count
 {
     if ((self = [super init]))
     {
         _values = [[NSArray alloc] initWithObjects:objects count:count];
         _keys = [[NSOrderedSet alloc] initWithObjects:keys count:count];
+        
+        NSParameterAssert([_values count] == count);
+        NSParameterAssert([_keys count] == count);
     }
     return self;
 }
 
-- (id)initWithCoder:(NSCoder *)decoder
+- (Class)classForCoder
+{
+    return [self class];
+}
+
+- (instancetype)initWithCoder:(NSCoder *)decoder
 {
     if ((self = [super init]))
     {
@@ -74,17 +114,27 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [coder encodeObject:_values forKey:@"values"];
-    [coder encodeObject:_keys forKey:@"values"];
+    [coder encodeObject:_keys forKey:@"keys"];
 }
 
-- (id)copyWithZone:(__unused NSZone *)zone
+- (instancetype)copyWithZone:(__unused NSZone *)zone
 {
     return self;
 }
 
-- (id)mutableCopyWithZone:(NSZone *)zone
+- (instancetype)mutableCopyWithZone:(NSZone *)zone
 {
     return [[MutableOrderedDictionary allocWithZone:zone] initWithDictionary:self];
+}
+
+- (NSArray *)allKeys
+{
+    return [_keys array];
+}
+
+- (NSArray *)allValues
+{
+    return [_values copy];
 }
 
 - (NSUInteger)count
@@ -92,9 +142,19 @@
     return [_keys count];
 }
 
+- (NSUInteger)indexOfKey:(id)key {
+    return [_keys indexOfObject:key];
+}
+
 - (id)objectForKey:(id)key
 {
-    return _values[[_keys indexOfObject:key]];
+    NSUInteger index = [_keys indexOfObject:key];
+    if (index != NSNotFound)
+    {
+        return _values[index];
+    }
+    return nil;
+   
 }
 
 - (NSEnumerator *)keyEnumerator
@@ -137,44 +197,6 @@
 - (id)objectAtIndexedSubscript:(NSUInteger)index
 {
   return _values[index];
-}
-
-static NSString *descriptionForObject(id object, id locale, NSUInteger indent)
-{
-    if ([object respondsToSelector:@selector(descriptionWithLocale:indent:)])
-    {
-        return [object descriptionWithLocale:locale indent:indent];
-    }
-    else if ([object respondsToSelector:@selector(descriptionWithLocale:)])
-    {
-        return [object descriptionWithLocale:locale];
-    }
-    else
-    {
-        return [object description];
-    }
-}
-
-- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)indent
-{
-    NSMutableString *padding = [NSMutableString string];
-    for (NSUInteger i = 0; i < indent; i++)
-    {
-        [padding appendString:@"    "];
-    }
-    
-    NSMutableString *description = [NSMutableString string];
-    [description appendFormat:@"%@{\n", padding];
-  
-    NSUInteger index = 0;
-    for (NSObject *key in _keys)
-    {
-        [description appendFormat:@"%@    %@ = %@;\n", padding,
-         descriptionForObject(key, locale, indent),
-         descriptionForObject(_values[index ++], locale, indent)];
-    }
-    [description appendFormat:@"%@}\n", padding];
-    return description;
 }
 
 @end
