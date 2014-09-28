@@ -46,7 +46,7 @@
 
 @implementation OrderedDictionary
 {
-@protected
+    @protected
     NSArray *_values;
     NSOrderedSet *_keys;
 }
@@ -204,6 +204,9 @@
 
 @implementation MutableOrderedDictionary
 
+#define _mutableValues ((NSMutableArray *)_values)
+#define _mutableKeys ((NSMutableOrderedSet *)_keys)
+
 + (instancetype)dictionaryWithCapacity:(NSUInteger)count
 {
     return [(MutableOrderedDictionary *)[self alloc] initWithCapacity:count];
@@ -213,8 +216,8 @@
 {
     if ((self = [super init]))
     {
-        self->_values = [[NSMutableArray alloc] initWithObjects:objects count:count];
-        self->_keys = [[NSMutableOrderedSet alloc] initWithObjects:keys count:count];
+        _values = [[NSMutableArray alloc] initWithObjects:objects count:count];
+        _keys = [[NSMutableOrderedSet alloc] initWithObjects:keys count:count];
     }
     return self;
 }
@@ -259,30 +262,36 @@
 - (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index
 {
     [self removeObjectForKey:key];
-    [(NSMutableOrderedSet *)_keys insertObject:key atIndex:index];
-    [(NSMutableArray *)_values insertObject:object atIndex:index];
+    [_mutableKeys insertObject:key atIndex:index];
+    [_mutableValues insertObject:object atIndex:index];
 }
 
 - (void)replaceObjectAtIndex:(NSUInteger)index withObject:(id)object
 {
-    ((NSMutableArray *)_values)[index] = object;
+    _mutableValues[index] = object;
 }
 
 - (void)setObject:(id)object atIndexedSubscript:(NSUInteger)index
 {
-    ((NSMutableArray *)_values)[index] = object;
+    _mutableValues[index] = object;
+}
+
+- (void)exchangeObjectAtIndex:(NSUInteger)idx1 withObjectAtIndex:(NSUInteger)idx2
+{
+    [_mutableKeys exchangeObjectAtIndex:idx1 withObjectAtIndex:idx2];
+    [_mutableValues exchangeObjectAtIndex:idx1 withObjectAtIndex:idx2];
 }
 
 - (void)removeAllObjects
 {
-    [(NSMutableOrderedSet *)_keys removeAllObjects];
-    [(NSMutableArray *)_values removeAllObjects];
+    [_mutableKeys removeAllObjects];
+    [_mutableValues removeAllObjects];
 }
 
 - (void)removeObjectAtIndex:(NSUInteger)index
 {
-    [(NSMutableOrderedSet *)_keys removeObjectAtIndex:index];
-    [(NSMutableArray *)_values removeObjectAtIndex:index];
+    [_mutableKeys removeObjectAtIndex:index];
+    [_mutableValues removeObjectAtIndex:index];
 }
 
 - (void)removeObjectForKey:(id)key
@@ -304,9 +313,9 @@
 
 - (void)setDictionary:(NSDictionary *)otherDictionary
 {
-    [(NSMutableOrderedSet *)_keys removeAllObjects];
-    [(NSMutableOrderedSet *)_keys addObjectsFromArray:[otherDictionary allKeys]];
-    [(NSMutableArray *)_values setArray:[otherDictionary allValues]];
+    [_mutableKeys removeAllObjects];
+    [_mutableKeys addObjectsFromArray:[otherDictionary allKeys]];
+    [_mutableValues setArray:[otherDictionary allValues]];
 }
 
 - (void)setObject:(id)object forKey:(id)key
@@ -314,12 +323,12 @@
     NSUInteger index = [_keys indexOfObject:key];
     if (index != NSNotFound)
     {
-        ((NSMutableArray *)_values)[index] = object;
+        _mutableValues[index] = object;
     }
     else
     {
-        [(NSMutableOrderedSet *)_keys addObject:key];
-        [(NSMutableArray *)_values addObject:object];
+        [_mutableKeys addObject:key];
+        [_mutableValues addObject:object];
     }
 }
 

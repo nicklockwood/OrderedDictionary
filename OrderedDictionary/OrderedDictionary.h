@@ -85,6 +85,8 @@
 /** Replace an object at a specific index in the dictionary. */
 - (void)replaceObjectAtIndex:(NSUInteger)index withObject:(id)object;
 - (void)setObject:(id)object atIndexedSubscript:(NSUInteger)index;
+/** Swap the indexes of two key/value pairs in the dictionary. */
+- (void)exchangeObjectAtIndex:(NSUInteger)idx1 withObjectAtIndex:(NSUInteger)idx2;
 /** Removes the nth object in the dictionary. */
 - (void)removeObjectAtIndex:(NSUInteger)index;
 

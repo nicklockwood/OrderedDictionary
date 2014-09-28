@@ -45,7 +45,8 @@ Version 1.2
 - Now supports NSCoding
 - Now supports reading and writing from a property list (order and mutability preserved)
 - Added keyAtIndex: method
-- Added replaceObjectAtIndex:withObject: and setObject:atIndexedSubscript:
+- Added replaceObjectAtIndex:withObject: and setObject:atIndexedSubscript: methods
+- Added exchangeObjectAtIndex:withObjectAtIndex: method
 - setObject:forKeyedSubscript: now works with non-string keys
 - Now uses NSOrderedSet internally, for better performance
 - Added unit tests
