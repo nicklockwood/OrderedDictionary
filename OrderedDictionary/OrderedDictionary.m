@@ -164,8 +164,8 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_values forKey:@"values"];
-    [coder encodeObject:_keys forKey:@"keys"];
+    [coder encodeObject:_values.copy forKey:@"values"];
+    [coder encodeObject:_keys.copy forKey:@"keys"];
 }
 
 - (instancetype)copyWithZone:(__unused NSZone *)zone
