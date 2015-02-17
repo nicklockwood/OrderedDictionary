@@ -271,6 +271,12 @@
     return [NSMutableArray class];
 }
 
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [coder encodeObject:_values.mutableCopy forKey:@"values"];
+    [coder encodeObject:_keys.mutableCopy forKey:@"keys"];
+}
+
 - (instancetype)initWithCapacity:(NSUInteger)capacity {
     if ((self = [super initEmpty]))
     {
