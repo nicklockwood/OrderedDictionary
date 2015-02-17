@@ -51,6 +51,14 @@
     NSOrderedSet *_keys;
 }
 
++ (Class)classForKeys {
+    return [NSOrderedSet class];
+}
+
++ (Class)classForValues {
+    return [NSArray class];
+}
+
 + (instancetype)dictionaryWithContentsOfFile:(NSString *)path
 {
     return [self dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
@@ -71,14 +79,39 @@
     return [self initWithDictionary:[NSDictionary dictionaryWithContentsOfURL:url]];
 }
 
+- (instancetype)initEmpty {
+    self = [super init];
+    
+    return self;
+}
+
+- (instancetype)init {
+    self = [super init];
+    
+    if (self) {
+        _values = [[[self class] classForValues] array];
+        _keys = [[[self class] classForKeys] orderedSet];
+    }
+    
+    return self;
+}
+
 - (instancetype)initWithObjects:(NSArray *)objects forKeys:(NSArray *)keys
 {
     if ((self = [super init]))
     {
-        _values = [objects copy];
-        _keys = [NSOrderedSet orderedSetWithArray:keys];
+        _values = [[[self class] classForValues] initWithArray:objects];
+        _keys = [[[self class] classForKeys] orderedSetWithArray:keys];
         
-        NSParameterAssert([_keys count] == [_values count]);
+        if (!_values) {
+            _values = [[[self class] classForValues] array];
+        }
+        
+        if (!_keys) {
+            _keys = [[[self class] classForKeys] orderedSet];
+        }
+        
+        NSAssert2(_keys.count == _values.count, @"Keys count (%lu) does not match values count (%lu)", (unsigned long)_keys.count, (unsigned long)_values.count);
     }
     return self;
 }
@@ -87,11 +120,39 @@
 {
     if ((self = [super init]))
     {
-        _values = [[NSArray alloc] initWithObjects:objects count:count];
-        _keys = [[NSOrderedSet alloc] initWithObjects:keys count:count];
+        _values = [[[[self class] classForValues] alloc] initWithObjects:objects count:count];
+        _keys = [[[[self class] classForKeys] alloc] initWithObjects:keys count:count];
         
-        NSParameterAssert([_values count] == count);
-        NSParameterAssert([_keys count] == count);
+        if (!_values) {
+            _values = [[[self class] classForValues] array];
+        }
+        
+        if (!_keys) {
+            _keys = [[[self class] classForKeys] orderedSet];
+        }
+        
+        NSAssert2(_keys.count == count, @"Keys count (%lu) does not match expected count (%lu)", (unsigned long)_keys.count, (unsigned long)count);
+        NSAssert2(_values.count == count, @"Valoues count (%lu) does not match expected count (%lu)", (unsigned long)_values.count, (unsigned long)count);
+    }
+    return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)decoder
+{
+    if ((self = [super init]))
+    {
+        _values = [decoder decodeObjectOfClass:[[self class] classForValues] forKey:@"values"];
+        _keys = [decoder decodeObjectOfClass:[[self class] classForKeys] forKey:@"keys"];
+        
+        if (!_values) {
+            _values = [[[self class] classForValues] array];
+        }
+        
+        if (!_keys) {
+            _keys = [[[self class] classForKeys] orderedSet];
+        }
+        
+        NSAssert2(_keys.count == _values.count, @"Keys count (%lu) does not match values count (%lu)", (unsigned long)_keys.count, (unsigned long)_values.count);
     }
     return self;
 }
@@ -99,16 +160,6 @@
 - (Class)classForCoder
 {
     return [self class];
-}
-
-- (instancetype)initWithCoder:(NSCoder *)decoder
-{
-    if ((self = [super init]))
-    {
-        _values = [decoder decodeObjectOfClass:[NSArray class] forKey:@"values"];
-        _keys = [decoder decodeObjectOfClass:[NSOrderedSet class] forKey:@"keys"];
-    }
-    return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -212,37 +263,19 @@
     return [(MutableOrderedDictionary *)[self alloc] initWithCapacity:count];
 }
 
-- (instancetype)initWithObjects:(const __unsafe_unretained id [])objects forKeys:(const __unsafe_unretained id <NSCopying> [])keys count:(NSUInteger)count
-{
-    if ((self = [super init]))
-    {
-        _values = [[NSMutableArray alloc] initWithObjects:objects count:count];
-        _keys = [[NSMutableOrderedSet alloc] initWithObjects:keys count:count];
-    }
-    return self;
++ (Class)classForKeys {
+    return [NSMutableOrderedSet class];
 }
 
-- (id)initWithCapacity:(NSUInteger)capacity
-{
-    if ((self = [super init]))
-    {
-        _values = [[NSMutableArray alloc] initWithCapacity:capacity];
-        _keys = [[NSMutableOrderedSet alloc] initWithCapacity:capacity];
-    }
-    return self;
++ (Class)classForValues {
+    return [NSMutableArray class];
 }
 
-- (id)init
-{
-    return [self initWithCapacity:0];
-}
-
-- (instancetype)initWithCoder:(NSCoder *)decoder
-{
-    if ((self = [super init]))
+- (instancetype)initWithCapacity:(NSUInteger)capacity {
+    if ((self = [super initEmpty]))
     {
-        _values = [decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"values"];
-        _keys = [decoder decodeObjectOfClass:[NSMutableOrderedSet class] forKey:@"keys"];
+        _values = (capacity > 0 ? [(NSMutableArray *)[[[self class] classForValues] alloc] initWithCapacity:capacity] : [[[self class] classForValues] array]);
+        _keys = (capacity > 0 ? [(NSMutableOrderedSet *)[[[self class] classForKeys] alloc] initWithCapacity:capacity] : [[[self class] classForKeys] orderedSet]);
     }
     return self;
 }
