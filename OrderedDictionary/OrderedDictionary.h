@@ -82,6 +82,8 @@
 
 /** Inserts an object at a specific index in the dictionary. */
 - (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index;
+/** Inserts an object, sorting by the indicated selector. */
+- (NSUInteger)insertObject:(id)object forKey:(id)key selector:(SEL)comparator;
 /** Replace an object at a specific index in the dictionary. */
 - (void)replaceObjectAtIndex:(NSUInteger)index withObject:(id)object;
 - (void)setObject:(id)object atIndexedSubscript:(NSUInteger)index;

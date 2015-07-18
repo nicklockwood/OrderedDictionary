@@ -266,6 +266,24 @@
     [_mutableValues insertObject:object atIndex:index];
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+- (NSUInteger)insertObject:(id)object forKey:(id)key selector:(SEL)comparator
+{
+    [self removeObjectForKey:key];
+    NSUInteger index;
+    for(index = 0; index < [_mutableKeys count]; ++index) {
+        NSComparisonResult result = (NSComparisonResult) [key performSelector:comparator withObject:[_mutableKeys objectAtIndex: index]];
+        if(result <= 0) {
+            break;
+        }
+    }
+    [_mutableKeys insertObject:key atIndex:index];
+    [_mutableValues insertObject:object atIndex:index];
+    return index;
+}
+#pragma clang diagnostic pop
+
 - (void)replaceObjectAtIndex:(NSUInteger)index withObject:(id)object
 {
     _mutableValues[index] = object;
