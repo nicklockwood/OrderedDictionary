@@ -32,6 +32,14 @@
 
 #import <Foundation/Foundation.h>
 
+//! Project version number for OrderedDictionary.
+FOUNDATION_EXPORT double OrderedDictionaryVersionNumber;
+
+//! Project version string for OrderedDictionary.
+FOUNDATION_EXPORT const unsigned char OrderedDictionaryVersionString[];
+
+
+
 /**
  * Ordered subclass of NSDictionary.
  * Supports all the same methods as NSDictionary, plus a few
