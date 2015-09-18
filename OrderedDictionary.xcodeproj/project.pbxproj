@@ -13,6 +13,7 @@
 		8A59BA0E1BAC06AB0078C308 /* OrderedDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 8A59B9D81BAC04180078C308 /* OrderedDictionary.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8A9E63981BAC2E7100F592A4 /* OrderedDictionaryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A9E63971BAC2E7100F592A4 /* OrderedDictionaryTests.m */; };
 		8A9E639A1BAC2E7100F592A4 /* OrderedDictionaryiOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A59B9D51BAC04180078C308 /* OrderedDictionaryiOS.framework */; settings = {ASSET_TAGS = (); }; };
+		8A9E63A41BAC319800F592A4 /* OrderedDictionaryiOS.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8A59B9D51BAC04180078C308 /* OrderedDictionaryiOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,6 +25,20 @@
 			remoteInfo = OrderedDictionaryiOS;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8A9E63A31BAC318200F592A4 /* Copy Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				8A9E63A41BAC319800F592A4 /* OrderedDictionaryiOS.framework in Copy Frameworks */,
+			);
+			name = "Copy Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		8A59B9D51BAC04180078C308 /* OrderedDictionaryiOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OrderedDictionaryiOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -164,6 +179,7 @@
 			buildPhases = (
 				8A9E63911BAC2E7000F592A4 /* Sources */,
 				8A9E63921BAC2E7000F592A4 /* Frameworks */,
+				8A9E63A31BAC318200F592A4 /* Copy Frameworks */,
 				8A9E63931BAC2E7000F592A4 /* Resources */,
 			);
 			buildRules = (
