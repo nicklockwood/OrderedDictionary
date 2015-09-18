@@ -8,15 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		8A59B9D91BAC04180078C308 /* OrderedDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 8A59B9D81BAC04180078C308 /* OrderedDictionary.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8A59B9E01BAC04180078C308 /* OrderedDictionaryiOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A59B9D51BAC04180078C308 /* OrderedDictionaryiOS.framework */; settings = {ASSET_TAGS = (); }; };
-		8A59B9E51BAC04180078C308 /* OrderedDictionaryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A59B9E41BAC04180078C308 /* OrderedDictionaryTests.m */; };
 		8A59B9F01BAC04A50078C308 /* OrderedDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A59B9EF1BAC04A50078C308 /* OrderedDictionary.m */; settings = {ASSET_TAGS = (); }; };
 		8A59BA0D1BAC06A10078C308 /* OrderedDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A59B9EF1BAC04A50078C308 /* OrderedDictionary.m */; };
 		8A59BA0E1BAC06AB0078C308 /* OrderedDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 8A59B9D81BAC04180078C308 /* OrderedDictionary.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8A9E63981BAC2E7100F592A4 /* OrderedDictionaryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A9E63971BAC2E7100F592A4 /* OrderedDictionaryTests.m */; };
+		8A9E639A1BAC2E7100F592A4 /* OrderedDictionaryiOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A59B9D51BAC04180078C308 /* OrderedDictionaryiOS.framework */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		8A9E638F1BAC0DAF00F592A4 /* PBXContainerItemProxy */ = {
+		8A9E639B1BAC2E7100F592A4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8A59B9CC1BAC04180078C308 /* Project object */;
 			proxyType = 1;
@@ -29,11 +29,11 @@
 		8A59B9D51BAC04180078C308 /* OrderedDictionaryiOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OrderedDictionaryiOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A59B9D81BAC04180078C308 /* OrderedDictionary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OrderedDictionary.h; sourceTree = "<group>"; };
 		8A59B9DA1BAC04180078C308 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8A59B9DF1BAC04180078C308 /* OrderedDictionaryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrderedDictionaryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		8A59B9E41BAC04180078C308 /* OrderedDictionaryTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OrderedDictionaryTests.m; sourceTree = "<group>"; };
-		8A59B9E61BAC04180078C308 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8A59B9EF1BAC04A50078C308 /* OrderedDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OrderedDictionary.m; sourceTree = "<group>"; };
 		8A59B9F61BAC05BF0078C308 /* OrderedDictionaryOSX.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OrderedDictionaryOSX.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A9E63951BAC2E7000F592A4 /* OrderedDictionaryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrderedDictionaryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A9E63971BAC2E7100F592A4 /* OrderedDictionaryTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OrderedDictionaryTests.m; sourceTree = "<group>"; };
+		8A9E63991BAC2E7100F592A4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,18 +44,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8A59B9DC1BAC04180078C308 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				8A59B9E01BAC04180078C308 /* OrderedDictionaryiOS.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8A59B9F21BAC05BF0078C308 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8A9E63921BAC2E7000F592A4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A9E639A1BAC2E7100F592A4 /* OrderedDictionaryiOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -66,7 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				8A59B9D71BAC04180078C308 /* OrderedDictionary */,
-				8A59B9E31BAC04180078C308 /* OrderedDictionaryTests */,
+				8A9E63961BAC2E7100F592A4 /* OrderedDictionaryTests */,
 				8A59B9D61BAC04180078C308 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -75,8 +75,8 @@
 			isa = PBXGroup;
 			children = (
 				8A59B9D51BAC04180078C308 /* OrderedDictionaryiOS.framework */,
-				8A59B9DF1BAC04180078C308 /* OrderedDictionaryTests.xctest */,
 				8A59B9F61BAC05BF0078C308 /* OrderedDictionaryOSX.framework */,
+				8A9E63951BAC2E7000F592A4 /* OrderedDictionaryTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -91,11 +91,11 @@
 			path = OrderedDictionary;
 			sourceTree = "<group>";
 		};
-		8A59B9E31BAC04180078C308 /* OrderedDictionaryTests */ = {
+		8A9E63961BAC2E7100F592A4 /* OrderedDictionaryTests */ = {
 			isa = PBXGroup;
 			children = (
-				8A59B9E41BAC04180078C308 /* OrderedDictionaryTests.m */,
-				8A59B9E61BAC04180078C308 /* Info.plist */,
+				8A9E63971BAC2E7100F592A4 /* OrderedDictionaryTests.m */,
+				8A9E63991BAC2E7100F592A4 /* Info.plist */,
 			);
 			path = OrderedDictionaryTests;
 			sourceTree = "<group>";
@@ -140,24 +140,6 @@
 			productReference = 8A59B9D51BAC04180078C308 /* OrderedDictionaryiOS.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		8A59B9DE1BAC04180078C308 /* OrderedDictionaryTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 8A59B9EC1BAC04180078C308 /* Build configuration list for PBXNativeTarget "OrderedDictionaryTests" */;
-			buildPhases = (
-				8A59B9DB1BAC04180078C308 /* Sources */,
-				8A59B9DC1BAC04180078C308 /* Frameworks */,
-				8A59B9DD1BAC04180078C308 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				8A9E63901BAC0DAF00F592A4 /* PBXTargetDependency */,
-			);
-			name = OrderedDictionaryTests;
-			productName = OrderedDictionaryTests;
-			productReference = 8A59B9DF1BAC04180078C308 /* OrderedDictionaryTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		8A59B9F51BAC05BF0078C308 /* OrderedDictionaryOSX */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8A59BA071BAC05BF0078C308 /* Build configuration list for PBXNativeTarget "OrderedDictionaryOSX" */;
@@ -176,6 +158,24 @@
 			productReference = 8A59B9F61BAC05BF0078C308 /* OrderedDictionaryOSX.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		8A9E63941BAC2E7000F592A4 /* OrderedDictionaryTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8A9E639D1BAC2E7100F592A4 /* Build configuration list for PBXNativeTarget "OrderedDictionaryTests" */;
+			buildPhases = (
+				8A9E63911BAC2E7000F592A4 /* Sources */,
+				8A9E63921BAC2E7000F592A4 /* Frameworks */,
+				8A9E63931BAC2E7000F592A4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8A9E639C1BAC2E7100F592A4 /* PBXTargetDependency */,
+			);
+			name = OrderedDictionaryTests;
+			productName = OrderedDictionaryTests;
+			productReference = 8A9E63951BAC2E7000F592A4 /* OrderedDictionaryTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -188,10 +188,10 @@
 					8A59B9D41BAC04180078C308 = {
 						CreatedOnToolsVersion = 7.0;
 					};
-					8A59B9DE1BAC04180078C308 = {
+					8A59B9F51BAC05BF0078C308 = {
 						CreatedOnToolsVersion = 7.0;
 					};
-					8A59B9F51BAC05BF0078C308 = {
+					8A9E63941BAC2E7000F592A4 = {
 						CreatedOnToolsVersion = 7.0;
 					};
 				};
@@ -210,7 +210,7 @@
 			targets = (
 				8A59B9D41BAC04180078C308 /* OrderedDictionaryiOS */,
 				8A59B9F51BAC05BF0078C308 /* OrderedDictionaryOSX */,
-				8A59B9DE1BAC04180078C308 /* OrderedDictionaryTests */,
+				8A9E63941BAC2E7000F592A4 /* OrderedDictionaryTests */,
 			);
 		};
 /* End PBXProject section */
@@ -223,14 +223,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8A59B9DD1BAC04180078C308 /* Resources */ = {
+		8A59B9F41BAC05BF0078C308 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8A59B9F41BAC05BF0078C308 /* Resources */ = {
+		8A9E63931BAC2E7000F592A4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -248,14 +248,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8A59B9DB1BAC04180078C308 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				8A59B9E51BAC04180078C308 /* OrderedDictionaryTests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8A59B9F11BAC05BF0078C308 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -264,13 +256,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8A9E63911BAC2E7000F592A4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A9E63981BAC2E7100F592A4 /* OrderedDictionaryTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		8A9E63901BAC0DAF00F592A4 /* PBXTargetDependency */ = {
+		8A9E639C1BAC2E7100F592A4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8A59B9D41BAC04180078C308 /* OrderedDictionaryiOS */;
-			targetProxy = 8A9E638F1BAC0DAF00F592A4 /* PBXContainerItemProxy */;
+			targetProxy = 8A9E639B1BAC2E7100F592A4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -312,7 +312,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -354,7 +354,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
@@ -399,26 +399,6 @@
 			};
 			name = Release;
 		};
-		8A59B9ED1BAC04180078C308 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = OrderedDictionaryTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.nicklockwood.OrderedDictionaryTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		8A59B9EE1BAC04180078C308 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = OrderedDictionaryTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.nicklockwood.OrderedDictionaryTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
 		8A59BA081BAC05BF0078C308 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -459,6 +439,28 @@
 			};
 			name = Release;
 		};
+		8A9E639E1BAC2E7100F592A4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = OrderedDictionaryTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.nicklockwood.OrderedDictionaryTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		8A9E639F1BAC2E7100F592A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = OrderedDictionaryTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.nicklockwood.OrderedDictionaryTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -480,15 +482,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8A59B9EC1BAC04180078C308 /* Build configuration list for PBXNativeTarget "OrderedDictionaryTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				8A59B9ED1BAC04180078C308 /* Debug */,
-				8A59B9EE1BAC04180078C308 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		8A59BA071BAC05BF0078C308 /* Build configuration list for PBXNativeTarget "OrderedDictionaryOSX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -497,6 +490,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		8A9E639D1BAC2E7100F592A4 /* Build configuration list for PBXNativeTarget "OrderedDictionaryTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A9E639E1BAC2E7100F592A4 /* Debug */,
+				8A9E639F1BAC2E7100F592A4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
