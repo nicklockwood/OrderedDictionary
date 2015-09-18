@@ -1,2 +1,2 @@
 language: objective-c
-script: xctool test -project OrderedDictionary.xcodeproj -scheme UnitTests -sdk iphonesimulator
+script: xctool test -project OrderedDictionary.xcodeproj -scheme OrderedDictionaryiOS -sdk iphonesimulator
