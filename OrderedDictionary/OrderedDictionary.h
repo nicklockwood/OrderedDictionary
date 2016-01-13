@@ -37,24 +37,29 @@
  * Supports all the same methods as NSDictionary, plus a few
  * new methods for operating on entities by index rather than key.
  */
-@interface OrderedDictionary : NSDictionary
+@interface OrderedDictionary<__covariant KeyType, __covariant ObjectType> : NSDictionary
 
 + (instancetype)dictionaryWithContentsOfFile:(NSString *)path;
 + (instancetype)dictionaryWithContentsOfURL:(NSURL *)url;
 
 /** Returns the nth key in the dictionary. */
-- (id)keyAtIndex:(NSUInteger)index;
+- (KeyType)keyAtIndex:(NSUInteger)index;
+
 /** Returns the nth object in the dictionary. */
-- (id)objectAtIndex:(NSUInteger)index;
-- (id)objectAtIndexedSubscript:(NSUInteger)index;
+- (ObjectType)objectAtIndex:(NSUInteger)index;
+- (ObjectType)objectAtIndexedSubscript:(NSUInteger)index;
+
 /** Returns the index of the specified key, or NSNotFound if key is not found. */
-- (NSUInteger)indexOfKey:(id)key;
+- (NSUInteger)indexOfKey:(KeyType)key;
+
 /** Returns an enumerator for backwards traversal of the dictionary keys. */
 - (NSEnumerator *)reverseKeyEnumerator;
+
 /** Returns an enumerator for backwards traversal of the dictionary objects. */
 - (NSEnumerator *)reverseObjectEnumerator;
+
 /** Enumerates keys ands objects with index using block. */
-- (void)enumerateKeysAndObjectsWithIndexUsingBlock:(void (^)(id key, id obj, NSUInteger idx, BOOL *stop))block;
+- (void)enumerateKeysAndObjectsWithIndexUsingBlock:(void (^)(KeyType key, ObjectType obj, NSUInteger idx, BOOL *stop))block;
 
 @end
 
@@ -67,26 +72,33 @@
  * is not a subclass of NSMutableDictionary, and cannot be used as one
  * without generating compiler warnings (unless you cast it).
  */
-@interface MutableOrderedDictionary : OrderedDictionary
+@interface MutableOrderedDictionary<KeyType, ObjectType> : OrderedDictionary
 
 + (instancetype)dictionaryWithCapacity:(NSUInteger)count;
 - (instancetype)initWithCapacity:(NSUInteger)count;
 
 - (void)addEntriesFromDictionary:(NSDictionary *)otherDictionary;
+
 - (void)removeAllObjects;
-- (void)removeObjectForKey:(id)key;
+- (void)removeObjectForKey:(KeyType)key;
 - (void)removeObjectsForKeys:(NSArray *)keyArray;
+
 - (void)setDictionary:(NSDictionary *)otherDictionary;
-- (void)setObject:(id)object forKey:(id)key;
-- (void)setObject:(id)object forKeyedSubscript:(id <NSCopying>)key;
+
+- (void)setObject:(ObjectType)object forKey:(KeyType)key;
+- (void)setObject:(ObjectType)object forKeyedSubscript:(KeyType <NSCopying>)key;
 
 /** Inserts an object at a specific index in the dictionary. */
-- (void)insertObject:(id)object forKey:(id)key atIndex:(NSUInteger)index;
+- (void)insertObject:(ObjectType)object forKey:(KeyType)key atIndex:(NSUInteger)index;
+
 /** Replace an object at a specific index in the dictionary. */
-- (void)replaceObjectAtIndex:(NSUInteger)index withObject:(id)object;
-- (void)setObject:(id)object atIndexedSubscript:(NSUInteger)index;
+- (void)replaceObjectAtIndex:(NSUInteger)index withObject:(ObjectType)object;
+
+- (void)setObject:(ObjectType)object atIndexedSubscript:(NSUInteger)index;
+
 /** Swap the indexes of two key/value pairs in the dictionary. */
 - (void)exchangeObjectAtIndex:(NSUInteger)idx1 withObjectAtIndex:(NSUInteger)idx2;
+
 /** Removes the nth object in the dictionary. */
 - (void)removeObjectAtIndex:(NSUInteger)index;
 
