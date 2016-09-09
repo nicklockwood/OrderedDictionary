@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.h
 //
-//  Version 1.2
+//  Version 1.3
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design
@@ -32,15 +32,14 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * Ordered subclass of NSDictionary.
  * Supports all the same methods as NSDictionary, plus a few
  * new methods for operating on entities by index rather than key.
  */
 @interface OrderedDictionary<__covariant KeyType, __covariant ObjectType> : NSDictionary<KeyType, ObjectType>
-
-+ (instancetype)dictionaryWithContentsOfFile:(NSString *)path;
-+ (instancetype)dictionaryWithContentsOfURL:(NSURL *)url;
 
 /** Returns the nth key in the dictionary. */
 - (KeyType)keyAtIndex:(NSUInteger)index;
@@ -91,3 +90,6 @@
 - (void)removeObjectAtIndex:(NSUInteger)index;
 
 @end
+
+NS_ASSUME_NONNULL_END
+

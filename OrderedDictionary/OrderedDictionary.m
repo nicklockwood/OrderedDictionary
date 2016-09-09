@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.m
 //
-//  Version 1.2
+//  Version 1.3
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design
@@ -34,7 +34,9 @@
 
 
 #pragma GCC diagnostic ignored "-Wobjc-missing-property-synthesis"
+#pragma GCC diagnostic ignored "-Wnullable-to-nonnull-conversion"
 #pragma GCC diagnostic ignored "-Wdirect-ivar-access"
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 #pragma GCC diagnostic ignored "-Wgnu"
 
 
@@ -51,24 +53,32 @@
     NSOrderedSet *_keys;
 }
 
-+ (instancetype)dictionaryWithContentsOfFile:(NSString *)path
++ (instancetype)dictionaryWithContentsOfFile:(__unused NSString *)path
 {
-    return [self dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
+    NSLog(@"OrderedDictionary does not support loading from a plist file. Use NSKeyedArchiver instead.");
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
-+ (instancetype)dictionaryWithContentsOfURL:(NSURL *)url
++ (instancetype)dictionaryWithContentsOfURL:(__unused NSURL *)url
 {
-    return [self dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfURL:url]];
+    NSLog(@"OrderedDictionary does not support loading from a plist file. Use NSKeyedArchiver instead.");
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
-- (instancetype)initWithContentsOfFile:(NSString *)path
+- (instancetype)initWithContentsOfFile:(__unused NSString *)path
 {
-    return [self initWithDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
+    NSLog(@"OrderedDictionary does not support loading from a plist file. Use NSKeyedArchiver instead.");
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
-- (instancetype)initWithContentsOfURL:(NSURL *)url
+- (instancetype)initWithContentsOfURL:(__unused NSURL *)url
 {
-    return [self initWithDictionary:[NSDictionary dictionaryWithContentsOfURL:url]];
+    NSLog(@"OrderedDictionary does not support loading from a plist file. Use NSKeyedArchiver instead.");
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
 - (instancetype)initWithObjects:(NSArray *)objects forKeys:(NSArray *)keys
@@ -101,6 +111,22 @@
     return [self class];
 }
 
+- (instancetype)init
+{
+    if ((self = [super init]) && [self class] == [OrderedDictionary class])
+    {
+        static OrderedDictionary *singleton;
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            singleton = self;
+            self->_values = @[];
+            self->_keys = [[NSOrderedSet alloc] init];
+        });
+        return singleton;
+    }
+    return self;
+}
+
 - (instancetype)initWithCoder:(NSCoder *)decoder
 {
     if ((self = [super init]))
@@ -115,6 +141,11 @@
 {
     [coder encodeObject:_values forKey:@"values"];
     [coder encodeObject:_keys forKey:@"keys"];
+}
+
++ (BOOL)supportsSecureCoding
+{
+    return YES;
 }
 
 - (instancetype)copyWithZone:(__unused NSZone *)zone
@@ -142,7 +173,8 @@
     return [_keys count];
 }
 
-- (NSUInteger)indexOfKey:(id)key {
+- (NSUInteger)indexOfKey:(id)key
+{
     return [_keys indexOfObject:key];
 }
 
@@ -196,7 +228,34 @@
 
 - (id)objectAtIndexedSubscript:(NSUInteger)index
 {
-  return _values[index];
+    return _values[index];
+}
+
+- (NSString *)descriptionWithLocale:(nullable id)locale indent:(NSUInteger)level
+{
+    NSMutableString *indent = [NSMutableString string];
+    for (int i = 0; i < level; i++)
+    {
+        [indent appendString:@"    "];
+    }
+    NSMutableString *string = [NSMutableString string];
+    [string appendString:indent];
+    [string appendString:@"{\n"];
+    [self enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj, __unused BOOL *stop) {
+        NSString *description;
+        if ([obj respondsToSelector:@selector(descriptionWithLocale:indent:)]) {
+            description = [obj descriptionWithLocale:locale indent:level + 1];
+        } else if ([obj respondsToSelector:@selector(descriptionWithLocale:)]) {
+            description = [obj descriptionWithLocale:locale];
+        } else {
+            description = [obj description];
+        }
+        [string appendString:indent];
+        [string appendFormat:@"    %@ = %@;\n", key, description];
+    }];
+    [string appendString:indent];
+    [string appendString:@"}"];
+    return string;
 }
 
 @end
@@ -222,7 +281,7 @@
     return self;
 }
 
-- (id)initWithCapacity:(NSUInteger)capacity
+- (instancetype)initWithCapacity:(NSUInteger)capacity
 {
     if ((self = [super init]))
     {
@@ -232,7 +291,7 @@
     return self;
 }
 
-- (id)init
+- (instancetype)init
 {
     return [self initWithCapacity:0];
 }
@@ -344,7 +403,7 @@
     }
 }
 
-- (void)setObject:(id)object forKeyedSubscript:(id <NSCopying>)key
+- (void)setObject:(id)object forKeyedSubscript:(id)key
 {
     [self setObject:object forKey:key];
 }
