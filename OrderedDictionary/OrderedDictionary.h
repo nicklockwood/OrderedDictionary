@@ -41,6 +41,21 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface OrderedDictionary<__covariant KeyType, __covariant ObjectType> : NSDictionary<KeyType, ObjectType>
 
+/**
+ * These methods can be used to load an XML plist file. The file must have a  
+ * dictionary node as its root object, and all dictionaries in the file will be
+ * treated as ordered. Currently, only XML plist files are supported, not
+ * binary or ascii. Xcode will automatically convert XML plists included in the
+ * project to binary files in built apps, so  you will need to disable that
+ * functionality if you wish to load them with these functions. A good approach
+ * is to rename such files with a .xml extension instead of .plist. See the
+ * OrderedDictionary README file for more details.
+ */
++ (nullable instancetype)dictionaryWithContentsOfFile:(NSString *)path;
++ (nullable instancetype)dictionaryWithContentsOfURL:(NSURL *)url;
+- (nullable instancetype)initWithContentsOfFile:(NSString *)path;
+- (nullable instancetype)initWithContentsOfURL:(NSURL *)url;
+
 /** Returns the nth key in the dictionary. */
 - (KeyType)keyAtIndex:(NSUInteger)index;
 /** Returns the nth object in the dictionary. */

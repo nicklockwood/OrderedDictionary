@@ -46,6 +46,31 @@
 #endif
 
 
+@interface NSObject (XMLPlistWriting)
+
+- (NSString *)XMLPlistStringWithIndent:(NSString *)indent;
+
+@end
+
+
+@interface OrderedDictionaryXMLPlistParser : NSObject<NSXMLParserDelegate>
+
+@property (nonatomic, readonly) OrderedDictionary *root;
+
+- (instancetype)initWithData:(NSData *)data  root:(OrderedDictionary *)root;
+
+@end
+
+
+@interface OrderedDictionaryBinaryParser : NSObject
+
+@property (nonatomic, readonly) OrderedDictionary *root;
+
+- (instancetype)initWithData:(NSData *)data  root:(OrderedDictionary *)root;
+
+@end
+
+
 @implementation OrderedDictionary
 {
     @protected
@@ -55,29 +80,29 @@
 
 + (instancetype)dictionaryWithContentsOfFile:(__unused NSString *)path
 {
-    NSLog(@"OrderedDictionary does not support loading from a plist file. Use NSKeyedArchiver instead.");
-    [self doesNotRecognizeSelector:_cmd];
-    return nil;
+    NSData *data = [NSData dataWithContentsOfFile:path];
+    __autoreleasing id dictionary = [[self alloc] initWithPlistData:data];
+    return dictionary;
 }
 
 + (instancetype)dictionaryWithContentsOfURL:(__unused NSURL *)url
 {
-    NSLog(@"OrderedDictionary does not support loading from a plist file. Use NSKeyedArchiver instead.");
-    [self doesNotRecognizeSelector:_cmd];
-    return nil;
+    NSData *data = [NSData dataWithContentsOfURL:url];
+    __autoreleasing id dictionary = [[self alloc] initWithPlistData:data];
+    return dictionary;
 }
 
 - (instancetype)initWithContentsOfFile:(__unused NSString *)path
 {
-    NSLog(@"OrderedDictionary does not support loading from a plist file. Use NSKeyedArchiver instead.");
-    [self doesNotRecognizeSelector:_cmd];
+    NSData *data = [NSData dataWithContentsOfFile:path];
+    return [self initWithPlistData:data];
     return nil;
 }
 
 - (instancetype)initWithContentsOfURL:(__unused NSURL *)url
 {
-    NSLog(@"OrderedDictionary does not support loading from a plist file. Use NSKeyedArchiver instead.");
-    [self doesNotRecognizeSelector:_cmd];
+    NSData *data = [NSData dataWithContentsOfURL:url];
+    return [self initWithPlistData:data];
     return nil;
 }
 
@@ -91,6 +116,26 @@
         NSParameterAssert([_keys count] == [_values count]);
     }
     return self;
+}
+
+- (instancetype)initWithPlistData:(NSData *)data
+{
+    if (data)
+    {
+        const void *bytes = data.bytes;
+        char header[7];
+        memcpy(header, &bytes, 6);
+        header[6] = '\0';
+        if (strcmp(header, "bplist") == 0)
+        {
+            return [[OrderedDictionaryBinaryParser alloc] initWithData:data root:[self init]].root;
+        }
+        else
+        {
+            return [[OrderedDictionaryXMLPlistParser alloc] initWithData:data root:[self init]].root;
+        }
+    }
+    return nil;
 }
 
 - (instancetype)initWithObjects:(const __unsafe_unretained id [])objects forKeys:(const __unsafe_unretained id <NSCopying> [])keys count:(NSUInteger)count
@@ -258,6 +303,24 @@
     return string;
 }
 
+- (NSString *)XMLPlistString
+{
+    return [NSString stringWithFormat:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            "<plist version=\"1.0\">\n%@\n</plist>\n",
+            [self XMLPlistStringWithIndent:@""]];
+}
+
+- (BOOL)writeToFile:(NSString *)path atomically:(BOOL)useAuxiliaryFile
+{
+    return [[self XMLPlistString] writeToFile:path atomically:useAuxiliaryFile encoding:NSUTF8StringEncoding error:NULL];
+}
+
+- (BOOL)writeToURL:(NSURL *)url atomically:(BOOL)atomically
+{
+    return [[self XMLPlistString] writeToURL:url atomically:atomically encoding:NSUTF8StringEncoding error:NULL];
+}
+
 @end
 
 
@@ -406,6 +469,239 @@
 - (void)setObject:(id)object forKeyedSubscript:(id)key
 {
     [self setObject:object forKey:key];
+}
+
+@end
+
+
+@implementation NSString (XMLPlistWriting)
+
+- (NSString *)XMLEscapedString
+{
+    return [[[self stringByReplacingOccurrencesOfString:@"&" withString:@"&amp;"]
+             stringByReplacingOccurrencesOfString:@"<" withString:@"&lt;"]
+            stringByReplacingOccurrencesOfString:@">" withString:@"&gt;"];
+}
+
+- (NSString *)XMLPlistStringWithIndent:(__unused NSString *)indent
+{
+    return [NSString stringWithFormat:@"<string>%@</string>", [self XMLEscapedString]];
+}
+
+@end
+
+
+@implementation NSNumber (XMLPlistWriting)
+
+- (NSString *)XMLPlistStringWithIndent:(__unused NSString *)indent
+{
+    if ((__bridge CFBooleanRef)self == kCFBooleanTrue)
+    {
+        return @"<true/>";
+    }
+    else if ((__bridge CFBooleanRef)self == kCFBooleanTrue)
+    {
+        return @"<false/>";
+    }
+    else if (self.doubleValue != (double)self.integerValue)
+    {
+        return [NSString stringWithFormat:@"<real>%@</real>", self];
+    }
+    else
+    {
+        return [NSString stringWithFormat:@"<integer>%@</integer>", self];
+    }
+}
+
+@end
+
+
+@implementation NSObject (XMLPlistWriting)
+
+- (NSString *)XMLPlistStringWithIndent:(__unused NSString *)indent
+{
+    // Error
+    return @"";
+}
+
+@end
+
+
+@implementation NSArray (XMLPlistWriting)
+
+- (NSString *)XMLPlistStringWithIndent:(NSString *)indent
+{
+    NSMutableString *xml = [NSMutableString string];
+    [xml appendString:@"<array>\n"];
+    NSString *subindent = [indent stringByAppendingString:@"\t"];
+    for (id value in self)
+    {
+        [xml appendString:subindent];
+        [xml appendString:[value XMLPlistStringWithIndent:subindent]];
+        [xml appendString:@"\n"];
+    }
+    [xml appendString:indent];
+    [xml appendString:@"</array>"];
+    return xml;
+}
+
+@end
+
+
+@implementation NSDictionary (XMLPlistWriting)
+
+- (NSString *)XMLPlistStringWithIndent:(NSString *)indent
+{
+    NSMutableString *xml = [NSMutableString string];
+    [xml appendString:@"<dict>\n"];
+    NSString *subindent = [indent stringByAppendingString:@"\t"];
+    [self enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull value, __unused BOOL *stop) {
+        [xml appendString:subindent];
+        [xml appendFormat:@"<key>%@</key>\n", [[key description] XMLEscapedString]];
+        [xml appendString:subindent];
+        [xml appendString:[value XMLPlistStringWithIndent:subindent]];
+        [xml appendString:@"\n"];
+    }];
+    [xml appendString:indent];
+    [xml appendString:@"</dict>"];
+    return xml;
+}
+
+@end
+
+
+@implementation OrderedDictionaryXMLPlistParser
+{
+    NSDateFormatter *_formatter;
+    NSMutableArray *_valueStack;
+    NSMutableArray *_keyStack;
+    NSString *_text;
+}
+
+- (instancetype)initWithData:(NSData *)data root:(OrderedDictionary *)root
+{
+    if ((self = [super init]))
+    {
+        _root = [root isKindOfClass:[MutableOrderedDictionary class]] ? root : nil;
+        _keyStack = [NSMutableArray array];
+        NSXMLParser *parser = [[NSXMLParser alloc] initWithData:data];
+        parser.delegate = self;
+        [parser parse];
+    }
+    return self;
+}
+
+- (void)parser:(__unused NSXMLParser *)parser didStartElement:(nonnull NSString *)elementName namespaceURI:(__unused NSString *)namespaceURI qualifiedName:(__unused NSString *)qName attributes:(__unused NSDictionary<NSString *, NSString *> *)attributeDict
+{
+    if ([elementName isEqualToString:@"dict"])
+    {
+        if (_valueStack == nil)
+        {
+            _valueStack = [NSMutableArray arrayWithObject:_root ?: [MutableOrderedDictionary dictionary]];
+        }
+        else
+        {
+            [_valueStack addObject:[MutableOrderedDictionary dictionary]];
+        }
+    }
+    else if (![elementName isEqualToString:@"plist"] && _valueStack == nil)
+    {
+        // error
+        return;
+    }
+    else if ([elementName isEqualToString:@"array"])
+    {
+        [_valueStack addObject:[NSMutableArray array]];
+    }
+}
+
+- (void)parser:(__unused NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(__unused NSString *)namespaceURI qualifiedName:(__unused NSString *)qName
+{
+    id value = [_text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    _text = nil;
+    
+    if ([elementName isEqualToString:@"key"])
+    {
+        [_keyStack addObject:value ?: @""];
+        return;
+    }
+    
+    if ([elementName isEqualToString:@"string"])
+    {
+        // Do nothing
+    }
+    else if ([elementName isEqualToString:@"real"])
+    {
+        value = @([value doubleValue]);
+    }
+    else if ([elementName isEqualToString:@"integer"])
+    {
+        value = @([value integerValue]);
+    }
+    else if ([elementName isEqualToString:@"date"])
+    {
+        if (_formatter)
+        {
+            _formatter = [[NSDateFormatter alloc] init];
+            _formatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+            _formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+            _formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
+        }
+        value = [_formatter dateFromString:value];
+    }
+    else if ([elementName isEqualToString:@"data"])
+    {
+        NSData *data = [value dataUsingEncoding:NSUTF8StringEncoding];
+        value = [[NSData alloc] initWithBase64EncodedData:data options:NSDataBase64DecodingIgnoreUnknownCharacters];
+    }
+    else if ([elementName isEqualToString:@"true"])
+    {
+        value = @YES;
+    }
+    else if ([elementName isEqualToString:@"false"])
+    {
+        value = @NO;
+    }
+    else if ([elementName isEqualToString:@"dict"] || [elementName isEqualToString:@"array"])
+    {
+        value = [[_valueStack lastObject] copy];
+        [_valueStack removeLastObject];
+    }
+    else if ([elementName isEqualToString:@"plist"])
+    {
+        return;
+    }
+    
+    id top = [_valueStack lastObject];
+    if ([top isKindOfClass:[MutableOrderedDictionary class]])
+    {
+        NSString *key = [_keyStack lastObject];
+        ((MutableOrderedDictionary *)top)[key] = value;
+        [_keyStack removeLastObject];
+    }
+    else if ([top isKindOfClass:[NSArray class]])
+    {
+        [(NSMutableArray *)top addObject:value];
+    }
+    else if (_root == nil)
+    {
+        _root = [value copy];
+    }
+}
+
+- (void)parser:(__unused NSXMLParser *)parser foundCharacters:(NSString *)string
+{
+    _text = [_text ?: @"" stringByAppendingString:string];
+}
+
+@end
+
+
+@implementation OrderedDictionaryBinaryParser
+
+- (instancetype)initWithData:(__unused NSData *)data root:(__unused OrderedDictionary *)root
+{
+    return self;
 }
 
 @end
