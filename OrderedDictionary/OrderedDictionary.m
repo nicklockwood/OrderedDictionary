@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.m
 //
-//  Version 1.3
+//  Version 1.4b
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design
@@ -62,15 +62,6 @@
 @end
 
 
-@interface OrderedDictionaryBinaryParser : NSObject
-
-@property (nonatomic, readonly) OrderedDictionary *root;
-
-- (instancetype)initWithData:(NSData *)data  root:(OrderedDictionary *)root;
-
-@end
-
-
 @implementation OrderedDictionary
 {
     @protected
@@ -78,28 +69,28 @@
     NSOrderedSet *_keys;
 }
 
-+ (instancetype)dictionaryWithContentsOfFile:(__unused NSString *)path
++ (instancetype)dictionaryWithContentsOfFile:(NSString *)path
 {
     NSData *data = [NSData dataWithContentsOfFile:path];
     __autoreleasing id dictionary = [[self alloc] initWithPlistData:data];
     return dictionary;
 }
 
-+ (instancetype)dictionaryWithContentsOfURL:(__unused NSURL *)url
++ (instancetype)dictionaryWithContentsOfURL:(NSURL *)url
 {
     NSData *data = [NSData dataWithContentsOfURL:url];
     __autoreleasing id dictionary = [[self alloc] initWithPlistData:data];
     return dictionary;
 }
 
-- (instancetype)initWithContentsOfFile:(__unused NSString *)path
+- (instancetype)initWithContentsOfFile:(NSString *)path
 {
     NSData *data = [NSData dataWithContentsOfFile:path];
     return [self initWithPlistData:data];
     return nil;
 }
 
-- (instancetype)initWithContentsOfURL:(__unused NSURL *)url
+- (instancetype)initWithContentsOfURL:(NSURL *)url
 {
     NSData *data = [NSData dataWithContentsOfURL:url];
     return [self initWithPlistData:data];
@@ -126,14 +117,9 @@
         char header[7];
         memcpy(header, &bytes, 6);
         header[6] = '\0';
-        if (strcmp(header, "bplist") == 0)
-        {
-            return [[OrderedDictionaryBinaryParser alloc] initWithData:data root:[self init]].root;
-        }
-        else
-        {
-            return [[OrderedDictionaryXMLPlistParser alloc] initWithData:data root:[self init]].root;
-        }
+        
+        NSAssert(strcmp(header, "bplist") != 0, @"OrderedDictionary does not support loading binary plist files. Use an XML plist file instead. Xcode automatically converts XML plist files to binary files in built apps - see documentation for tips on how to disable this.");
+        return [[OrderedDictionaryXMLPlistParser alloc] initWithData:data root:[self init]].root;
     }
     return nil;
 }
@@ -692,16 +678,6 @@
 - (void)parser:(__unused NSXMLParser *)parser foundCharacters:(NSString *)string
 {
     _text = [_text ?: @"" stringByAppendingString:string];
-}
-
-@end
-
-
-@implementation OrderedDictionaryBinaryParser
-
-- (instancetype)initWithData:(__unused NSData *)data root:(__unused OrderedDictionary *)root
-{
-    return self;
 }
 
 @end
