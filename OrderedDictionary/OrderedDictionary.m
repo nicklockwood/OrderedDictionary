@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.m
 //
-//  Version 1.4b
+//  Version 1.4
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design
@@ -44,6 +44,26 @@
 #if !__has_feature(objc_arc)
 #error This class requires automatic reference counting
 #endif
+
+
+@implementation NSThread (XMLPlist)
+
+- (NSDateFormatter *)XMLPlistDateFormatter
+{
+    static NSString *const key = @"XMLPlistDateFormatter";
+    NSDateFormatter *formatter = self.threadDictionary[key];
+    if (!formatter)
+    {
+        formatter = [[NSDateFormatter alloc] init];
+        formatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+        formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+        formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ss'Z'";
+        self.threadDictionary[key] = formatter;
+    }
+    return formatter;
+}
+
+@end
 
 
 @interface NSObject (XMLPlistWriting)
@@ -191,7 +211,7 @@
 
 - (NSArray *)allKeys
 {
-    return [_keys array];
+    return _keys.array;
 }
 
 - (NSArray *)allValues
@@ -201,7 +221,7 @@
 
 - (NSUInteger)count
 {
-    return [_keys count];
+    return _keys.count;
 }
 
 - (NSUInteger)indexOfKey:(id)key
@@ -422,8 +442,8 @@
 - (void)setDictionary:(NSDictionary *)otherDictionary
 {
     [_mutableKeys removeAllObjects];
-    [_mutableKeys addObjectsFromArray:[otherDictionary allKeys]];
-    [_mutableValues setArray:[otherDictionary allValues]];
+    [_mutableKeys addObjectsFromArray:otherDictionary.allKeys];
+    [_mutableValues setArray:otherDictionary.allValues];
 }
 
 - (void)setObject:(id)object forKey:(id)key
@@ -460,6 +480,18 @@
 @end
 
 
+@implementation NSObject (XMLPlistWriting)
+
+- (NSString *)XMLPlistStringWithIndent:(__unused NSString *)indent
+{
+    NSLog(@"%@ is not a supported property list type.", self.classForCoder);
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+@end
+
+
 @implementation NSString (XMLPlistWriting)
 
 - (NSString *)XMLEscapedString
@@ -485,7 +517,7 @@
     {
         return @"<true/>";
     }
-    else if ((__bridge CFBooleanRef)self == kCFBooleanTrue)
+    else if ((__bridge CFBooleanRef)self == kCFBooleanFalse)
     {
         return @"<false/>";
     }
@@ -502,12 +534,23 @@
 @end
 
 
-@implementation NSObject (XMLPlistWriting)
+@implementation NSDate (XMLPlistWriting)
 
 - (NSString *)XMLPlistStringWithIndent:(__unused NSString *)indent
 {
-    // Error
-    return @"";
+    NSDateFormatter *formatter = [[NSThread currentThread] XMLPlistDateFormatter];
+    return [NSString stringWithFormat:@"<date>%@</date>", [formatter stringFromDate:self]];
+}
+
+@end
+
+
+@implementation NSData (XMLPlistWriting)
+
+- (NSString *)XMLPlistStringWithIndent:(NSString *)indent
+{
+    NSString *base64 = [self base64EncodedStringWithOptions:(NSDataBase64EncodingOptions)0];
+    return [NSString stringWithFormat:@"<data>\n%@%@\n%@</data>", indent, base64, indent];
 }
 
 @end
@@ -562,6 +605,7 @@
     NSMutableArray *_valueStack;
     NSMutableArray *_keyStack;
     NSString *_text;
+    BOOL _failed;
 }
 
 - (instancetype)initWithData:(NSData *)data root:(OrderedDictionary *)root
@@ -577,7 +621,14 @@
     return self;
 }
 
-- (void)parser:(__unused NSXMLParser *)parser didStartElement:(nonnull NSString *)elementName namespaceURI:(__unused NSString *)namespaceURI qualifiedName:(__unused NSString *)qName attributes:(__unused NSDictionary<NSString *, NSString *> *)attributeDict
+- (void)failWithError:(NSString *)error
+{
+    NSLog(@"OrderedDictionary XML parsing error: %@", error);
+    _failed = YES;
+    _root = nil;
+}
+
+- (void)parser:(NSXMLParser *)parser didStartElement:(nonnull NSString *)elementName namespaceURI:(__unused NSString *)namespaceURI qualifiedName:(__unused NSString *)qName attributes:(__unused NSDictionary<NSString *, NSString *> *)attributeDict
 {
     if ([elementName isEqualToString:@"dict"])
     {
@@ -592,7 +643,8 @@
     }
     else if (![elementName isEqualToString:@"plist"] && _valueStack == nil)
     {
-        // error
+        [self failWithError:@"Root element was not a dictionary."];
+        [parser abortParsing];
         return;
     }
     else if ([elementName isEqualToString:@"array"])
@@ -601,7 +653,7 @@
     }
 }
 
-- (void)parser:(__unused NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(__unused NSString *)namespaceURI qualifiedName:(__unused NSString *)qName
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(__unused NSString *)namespaceURI qualifiedName:(__unused NSString *)qName
 {
     id value = [_text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     _text = nil;
@@ -626,19 +678,27 @@
     }
     else if ([elementName isEqualToString:@"date"])
     {
-        if (_formatter)
+        if (!_formatter)
         {
-            _formatter = [[NSDateFormatter alloc] init];
-            _formatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
-            _formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
-            _formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
+            _formatter = [[NSThread currentThread] XMLPlistDateFormatter];
         }
-        value = [_formatter dateFromString:value];
+        NSString *dateString = value;
+        if (!(value = [_formatter dateFromString:dateString]))
+        {
+            [self failWithError:[NSString stringWithFormat:@"Unabled to parse date string: %@", dateString]];
+            [parser abortParsing];
+            return;
+        }
     }
     else if ([elementName isEqualToString:@"data"])
     {
         NSData *data = [value dataUsingEncoding:NSUTF8StringEncoding];
-        value = [[NSData alloc] initWithBase64EncodedData:data options:NSDataBase64DecodingIgnoreUnknownCharacters];
+        if (!(value = [[NSData alloc] initWithBase64EncodedData:data options:NSDataBase64DecodingIgnoreUnknownCharacters]))
+        {
+            [self failWithError:@"Unabled to parse data."];
+            [parser abortParsing];
+            return;
+        }
     }
     else if ([elementName isEqualToString:@"true"])
     {
@@ -650,7 +710,7 @@
     }
     else if ([elementName isEqualToString:@"dict"] || [elementName isEqualToString:@"array"])
     {
-        value = [[_valueStack lastObject] copy];
+        value = [_valueStack.lastObject copy];
         [_valueStack removeLastObject];
     }
     else if ([elementName isEqualToString:@"plist"])
@@ -658,10 +718,10 @@
         return;
     }
     
-    id top = [_valueStack lastObject];
+    id top = _valueStack.lastObject;
     if ([top isKindOfClass:[MutableOrderedDictionary class]])
     {
-        NSString *key = [_keyStack lastObject];
+        NSString *key = _keyStack.lastObject;
         ((MutableOrderedDictionary *)top)[key] = value;
         [_keyStack removeLastObject];
     }
@@ -669,7 +729,7 @@
     {
         [(NSMutableArray *)top addObject:value];
     }
-    else if (_root == nil)
+    else if (_root == nil && !_failed)
     {
         _root = [value copy];
     }

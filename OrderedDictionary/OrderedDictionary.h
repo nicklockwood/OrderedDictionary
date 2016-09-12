@@ -1,7 +1,7 @@
 //
 //  OrderedDictionary.h
 //
-//  Version 1.4b
+//  Version 1.4
 //
 //  Created by Nick Lockwood on 21/09/2010.
 //  Copyright 2010 Charcoal Design

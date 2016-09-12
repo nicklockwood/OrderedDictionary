@@ -55,7 +55,7 @@ The second approach has the advantage that if doesn't affect other plist files b
 Release Notes
 ---------------
 
-Version 1.4b
+Version 1.4
 
 - Added support for loading/saving OrderedDictionary from an XML property list file (binary files are not supported)
 
