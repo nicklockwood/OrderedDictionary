@@ -1,4 +1,8 @@
-[![Build Status](https://travis-ci.org/nicklockwood/OrderedDictionary.svg)](https://travis-ci.org/nicklockwood/OrderedDictionary)
+[![Travis](https://img.shields.io/travis/nicklockwood/OrderedDictionary.svg?maxAge=2592000)](https://travis-ci.org/nicklockwood/OrderedDictionary)
+[![License](https://img.shields.io/badge/license-zlib-lightgrey.svg?maxAge=2592000)](https://opensource.org/licenses/Zlib)
+[![CocoaPods](https://img.shields.io/cocoapods/p/OrderedDictionary.svg?maxAge=2592000)](https://cocoapods.org/pods/OrderedDictionary)
+[![CocoaPods](https://img.shields.io/cocoapods/metrics/doc-percent/OrderedDictionary.svg?maxAge=2592000)](http://cocoadocs.org/docsets/OrderedDictionary/)
+[![Twitter](https://img.shields.io/badge/twitter-@nicklockwood-blue.svg?maxAge=2592000)](http://twitter.com/nicklockwood)
 
 
 Purpose
