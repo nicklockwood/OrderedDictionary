@@ -98,6 +98,96 @@
     XCTAssertEqualObjects(d2[@"foo"], @"bar");
 }
 
+static NSString *samplePlist()
+{
+    return @"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+    "<plist version=\"1.0\">\n"
+    "<dict>\n"
+    "\t<key>0</key>\n"
+    "\t<integer>1</integer>\n"
+    "\t<key>2</key>\n"
+    "\t<integer>3</integer>\n"
+    "\t<key>1</key>\n"
+    "\t<integer>7</integer>\n"
+    "</dict>\n"
+    "</plist>\n";
+}
+
+- (void)testWriting
+{
+    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"OrderedDictionary.plist"];
+    XCTAssertTrue([d writeToFile:path atomically:YES]);
+    NSError *error = nil;
+    NSString *plist = [NSString stringWithContentsOfFile:path usedEncoding:NULL error:&error];
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(plist, samplePlist());
+}
+
+- (void)testWritingAllTypes
+{
+    OrderedDictionary *d1 = [OrderedDictionary dictionaryWithObjectsAndKeys:
+                             @"hello world", @"string",
+                             @5, @"integer",
+                             @5.5, @"real",
+                             @YES, @"true",
+                             @NO, @"false",
+                             [NSDate date], @"date",
+                             [@"hello world" dataUsingEncoding:NSUTF8StringEncoding], @"data",
+                             @[@"foo", @"bar"], @"array",
+                             @{@"foo": @"bar", @"baz": @"quux"}, @"dict",
+                             nil];
+    
+    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"OrderedDictionary.plist"];
+    XCTAssertTrue([d1 writeToFile:path atomically:YES]);
+    NSDictionary *d2 = [NSDictionary dictionaryWithContentsOfFile:path];
+    XCTAssertNotNil(d2);
+    for (NSString *key in d1)
+    {
+        XCTAssertEqualObjects([d1[key] description], [d2[key] description]);
+    }
+}
+
+- (void)testReading
+{
+    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"OrderedDictionary.plist"];
+    NSError *error = nil;
+    XCTAssertTrue([samplePlist() writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:&error]);
+    XCTAssertNil(error);
+    
+    MutableOrderedDictionary *d2 = [MutableOrderedDictionary dictionaryWithContentsOfFile:path];
+    XCTAssertEqualObjects([d2 class], [MutableOrderedDictionary class]);
+    XCTAssertEqualObjects([d2 allKeys], (@[@"0",@"2",@"1"]));
+    XCTAssertEqualObjects(d, d2);
+    
+    d2 = [[MutableOrderedDictionary alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path]];
+    XCTAssertEqualObjects([d2 class], [MutableOrderedDictionary class]);
+    XCTAssertEqualObjects([d2 allKeys], (@[@"0",@"2",@"1"]));
+    XCTAssertEqualObjects(d, d2);
+}
+
+- (void)testReadingAllTypes
+{
+    NSDictionary *d1 = @{@"string": @"hello world",
+                         @"integer": @5,
+                         @"real": @5.5,
+                         @"true": @YES,
+                         @"false": @NO,
+                         @"date": [NSDate date],
+                         @"data": [@"hello world" dataUsingEncoding:NSUTF8StringEncoding],
+                         @"array": @[@"foo", @"bar"],
+                         @"dict": @{@"foo": @"bar", @"baz": @"quux"}};
+    
+    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"OrderedDictionary.plist"];
+    XCTAssertTrue([d1 writeToFile:path atomically:YES]);
+    OrderedDictionary *d2 = [OrderedDictionary dictionaryWithContentsOfFile:path];
+    XCTAssertNotNil(d2);
+    for (NSString *key in d1)
+    {
+        XCTAssertEqualObjects([d1[key] description], [d2[key] description]);
+    }
+}
+
 - (void)testDescription
 {
     OrderedDictionary *d1 = [OrderedDictionary dictionaryWithObject:@{
