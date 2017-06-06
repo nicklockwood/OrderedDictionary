@@ -422,6 +422,12 @@
     [_mutableValues removeObjectAtIndex:index];
 }
 
+- (void)removeObjectsAtIndexes:(NSIndexSet *)indexes
+{
+    [_mutableKeys removeObjectsAtIndexes:indexes];
+    [_mutableValues removeObjectsAtIndexes:indexes];
+}
+
 - (void)removeObjectForKey:(id)key
 {
     NSUInteger index = [self->_keys indexOfObject:key];

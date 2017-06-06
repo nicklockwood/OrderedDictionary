@@ -103,6 +103,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)exchangeObjectAtIndex:(NSUInteger)idx1 withObjectAtIndex:(NSUInteger)idx2;
 /** Removes the nth object in the dictionary. */
 - (void)removeObjectAtIndex:(NSUInteger)index;
+/** Removes the objects at the specified indexes from the mutable ordered set. */
+- (void)removeObjectsAtIndexes:(NSIndexSet *)indexes;
 
 @end
 
