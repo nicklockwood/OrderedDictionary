@@ -17,7 +17,7 @@
   "source_files": "OrderedDictionary",
   "requires_arc": true,
   "platforms": {
-    "ios": "4.3",
+    "ios": "6.0",
     "osx": "10.6",
     "tvos": "9.0",
     "watchos": "2.0"
