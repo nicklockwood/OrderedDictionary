@@ -480,7 +480,7 @@
 
 - (void)setObject:(id)object forKeyedSubscript:(id)key
 {
-    [self setObject:object forKey:key];
+    [self setValue:object forKey:key];
 }
 
 @end
